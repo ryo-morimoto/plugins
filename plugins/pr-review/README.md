@@ -28,6 +28,7 @@ PR のレビューで、チームのメンタルモデル（システムの作�
 | `import-findings.py` | script | pr-tour の JSON 書き出しを、リポジトリの内容と照合してから、記録として取り込む |
 | `resolve-permalinks.py` | script | 固定リンクの行の存在と本文を確かめる（関連性は確かめない） |
 | `validate-records.py` | script | 記録が書式に合うかを検査する |
+| `render-review-html.py` | script | 下書きを、文や語句にコメントできる HTML にする（結果は「Copy for AI」で書き出す） |
 | `evaluator` | agent | 下書きを、基準に照らして独立に評価する（読み取り専用） |
 | `references/records.md` | 参照 | 記録の書式 |
 | `references/rules.md` | 参照 | コメントを書く規則（作者個人の基準） |
@@ -81,7 +82,7 @@ PR のレビューで、チームのメンタルモデル（システムの作�
 
 `claude plugin validate` は、plugin と marketplace の両方で成功しました（2026-11-20）。静的な検査と、skill・agent の検出までで、実行時の挙動は検証していません。
 
-スクリプトのテストは、リポジトリの根で次のコマンドで実行します。2026-11-20 に、Python 3.9.6、3.14.10、3.15.2 のそれぞれで、103 件が通ることを確認しました（合成データのみ）。
+スクリプトのテストは、リポジトリの根で次のコマンドで実行します。2026-11-20 に、Python 3.9.6、3.14.10、3.15.2 のそれぞれで、119 件が通ることを確認しました（合成データのみ）。
 
 ```
 python3 -m unittest discover -s plugins/pr-review/tests -v
