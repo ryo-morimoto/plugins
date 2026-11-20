@@ -319,6 +319,22 @@ class ImportFindingsTest(unittest.TestCase):
         self.export["comments"][1]["commit"] = head.stdout.strip()
         self.assertEqual(self.run_import(source=self.write_export(self.export)).returncode, 0)
 
+    def test_real_export_shape_uuid_id_tab_and_japanese_code(self):
+        comment = {
+            "id": "c6df291d-4545-4978-9de8-db1c28173d47", "path": "src/amount.ts", "side": "right",
+            "commit": "0" * 40, "startLine": 3, "endLine": 3,
+            "code": "\t * 合計の端数は、ここで丸めない（日本語の注釈）", "body": "丸める場所を、確認したいです。",
+            "createdAt": "2026-11-20T03:45:11.533Z", "updatedAt": "2026-11-20T03:45:11.533Z",
+        }
+        export = copy.deepcopy(self.export)
+        export["comments"] = [comment]
+        self.repo = self.tmp / "repo-real"
+        comment["commit"] = make_repo(self.repo, export)
+        result = self.run_import(source=self.write_export(export))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        meta, _, _ = self.findings()[comment["id"]]
+        self.assertEqual(meta["origin_ref"], comment["id"])
+
     def test_unreadable_input_exits_2(self):
         broken = self.tmp / "broken.json"
         broken.write_text("{not json", encoding="utf-8")
