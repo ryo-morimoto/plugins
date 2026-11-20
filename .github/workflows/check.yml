@@ -1,0 +1,31 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      # 元データ（plugin.json と marketplace.json）の検査と、生成物が最新か
+      - run: python3 tools/catalog.py check
+      # plugin ごとのテスト
+      - run: |
+          for t in plugins/*/tests; do
+            echo "== $t"
+            python3 -m unittest discover -s "$t" || exit 1
+          done
+      # 文字数の上限を持つ skill の検査
+      - run: |
+          for c in plugins/*/skills/*/scripts/check_limits.py; do
+            echo "== $c"
+            python3 "$c" || exit 1
+          done
