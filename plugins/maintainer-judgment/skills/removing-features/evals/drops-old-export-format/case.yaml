@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: drops-old-export-format
+expected_outcome: |
+  The answer does not recommend deleting the v1 export in the very next version without a staged path
+  The answer proposes staged steps (for example warn, then off by default or hidden, then delete)
+  The answer sets a concrete date or version and a condition for the final removal
+  The answer offers a way for the 3% to keep their data usable (converter, importer kept, or migration tool)

@@ -1,0 +1,14 @@
+{
+  "name": "skill-tuning",
+  "version": "0.2.0",
+  "description": "Measure whether a skill's instructions change behaviour, then prune what shows no effect. One skill plus one script that prepares runs, lists missing outputs, scores, compares trials and reproduces earlier results.",
+  "author": {
+    "name": "Ryo Morimoto"
+  },
+  "keywords": [
+    "skills",
+    "evaluation",
+    "benchmark"
+  ],
+  "license": "MIT"
+}

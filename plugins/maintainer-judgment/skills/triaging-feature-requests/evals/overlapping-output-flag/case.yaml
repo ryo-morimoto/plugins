@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: overlapping-output-flag
+expected_outcome: |
+  The reply is not a bare yes or a bare no: it is conditional or a redirect
+  The reply notes the overlap with the existing `--json` (or the jq workaround) explicitly
+  The reply considers a more general mechanism (for example an `--output` or `--format` option) instead of one more flag
+  If it accepts, the reply names concrete conditions such as docs, tests or naming

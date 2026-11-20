@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: renames-key-and-drops-api
+expected_outcome: |
+  The plan gives a separate decision for each of the three items (config key, CLI flag, library method) rather than one shared plan
+  The old config key `cache_dir` keeps working (alias or automatic fallback) for at least one release
+  `Client.fetch_all()` is not deleted outright in the next release: the name is kept, stubbed, or wrapped around `Client.iter()`
+  The plan asks for evidence of outside usage (or a public question to users) before removing `--no-color` or `fetch_all`

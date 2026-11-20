@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: one-loud-request
+expected_outcome: |
+  The answer recommends staying with the native toolbar
+  The answer says a single request, even a loud one, is not enough reason to go custom
+  The answer names what conditions would change the decision
+  The answer offers a smaller alternative (limited tweak, opt-in, or a different path for the customer)

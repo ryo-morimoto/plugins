@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: pr-changes-timeout-meaning
+expected_outcome: |
+  The reply does not approve the PR as is
+  The reply identifies that the PR changes existing behavior that callers rely on
+  The reply asks for the motivation or evidence behind 'everyone expects'
+  The reply proposes a path that keeps the old meaning (new parameter, opt-in, or new name)
+  The reply stays constructive and gives the contributor a concrete next step
