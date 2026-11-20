@@ -16,6 +16,12 @@
       "description": "思考実験を一緒に回し、標準や論文の分類を軸にした地図で、空いているところと次の推論の方向を選べるようにする",
       "source": "./plugins/thought-experiments",
       "category": "productivity"
+    },
+    {
+      "name": "naming",
+      "description": "Tellman の方法で名前を付ける・変える。範囲をまとめて直すときは、名前を数え上げ、指摘がなくなるまで繰り返し、判定を台帳に残す",
+      "source": "./plugins/naming",
+      "category": "development"
     }
   ]
 }
