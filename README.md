@@ -8,6 +8,7 @@
 | --- | --- |
 | [pr-review](plugins/pr-review/README.md) | PR のレビューコメントの下書きを、気づきの整理から承認できる状態まで作る |
 | [thought-experiments](plugins/thought-experiments/README.md) | 思考実験を一緒に回し、標準や論文の分類を軸にした地図で、空いているところと次の推論の方向を選べるようにする |
+| [naming](plugins/naming/README.md) | Tellman の方法で名前を付ける・変える。範囲をまとめて直すときは、名前を数え上げ、指摘がなくなるまで繰り返し、判定を台帳に残す |
 
 plugin の使い方は、それぞれの README を見てください。
 
