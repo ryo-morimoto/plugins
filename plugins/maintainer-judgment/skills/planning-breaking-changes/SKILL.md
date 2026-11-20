@@ -1,8 +1,8 @@
 ---
-name: removing-features
+name: planning-breaking-changes
 description: Checks a plan to remove, deprecate, rename or break a feature, flag, API or config key. Use whenever the user wants to delete or change existing behavior, even if they only say "clean up".
 ---
-# Removing features
+# Planning breaking changes
 
 Before you break something, decide who pays for the move.
 

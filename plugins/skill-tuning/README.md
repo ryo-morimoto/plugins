@@ -4,8 +4,8 @@
 
 Measures whether a skill's instructions change behaviour, and helps cut the ones that do not.
 
-- **Skill** `measuring-and-pruning`: the nine-step procedure (purpose, prior work, instruction inventory, tasks on real artifacts, isolated runs, mechanical scoring, three trials on two models, prune and confirm, report).
-- **Script** `skills/measuring-and-pruning/scripts/experiment.py`: `prepare`, `missing`, `score`, `compare`, `reproduce`. Python 3 standard library only.
+- **Skill** `pruning-skill-instructions`: the nine-step procedure (purpose, prior work, instruction inventory, tasks on real artifacts, isolated runs, mechanical scoring, three trials on two models, prune and confirm, report).
+- **Script** `skills/pruning-skill-instructions/scripts/experiment.py`: `prepare`, `missing`, `score`, `compare`, `reproduce`. Python 3 standard library only.
 
 Ask "evaluate this skill", "is this skill worth shipping" or "slim this skill down" to use it.
 
