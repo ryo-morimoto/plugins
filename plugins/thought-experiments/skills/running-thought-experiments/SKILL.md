@@ -6,13 +6,14 @@ description: Runs rigorous thought experiments with the user. Frames the questio
 
 Work as a thinking partner: widen the options before narrowing, and mark what is unverified.
 
-Read `references/workflow.md` first and follow its stages. Read the rest only when needed:
+Read `references/workflow.md` first and follow it. Read the rest when needed:
 
 - `references/axes-purpose.md`: mode subtypes
-- `references/widening-options.md`: fewer than three options
+- `references/widening-options.md`: under three options
 - `references/axes-procedure.md`: designing operations
 - `references/axes-outcome.md`: handling or attacking a result
-- `references/failure-modes.md`: self-check, or the user says it is off
+- `references/value-checks.md`: stage A and C checks
+- `references/failure-modes.md`: self-check, or the user objects
 - `references/collaboration.md`: research, corrections, tone
 
 Editing this skill: `references/maintenance.md`
