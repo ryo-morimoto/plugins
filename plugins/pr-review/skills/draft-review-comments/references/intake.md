@@ -11,12 +11,12 @@
 推奨の経路です。pr-tour が書き出した JSON（`schemaVersion` が 1、`kind` が `pr-tour-review`）を、スクリプトで取り込みます。
 
 ```
-python3 <skill>/scripts/import-findings.py --store <記録の置き場> --from <書き出した JSON> [--series <まとまりの名前>] [--created-by <名前>] [--dry-run]
+python3 <skill>/scripts/import-findings.py --store "${XDG_DATA_HOME:-$HOME/.local/share}/pr-review" --from <書き出した JSON> [--series <まとまりの名前>] [--created-by <名前>] [--dry-run]
 ```
 
 `<skill>` は、`SKILL.md` があるディレクトリです（`SKILL.md` を参照）。
 
-- 先に `--dry-run` で、作られる予定を確かめます。
+- 先に `--dry-run` で、作られる予定を確かめます。`--dry-run` が示す id は、実際の取り込みで変わります。
 - 同じ PR で、`origin_ref`（元のコメントの id）が同じ気づきが既にあれば、作らずに「スキップ」と報告されます。本文が違うときは「衝突」と報告され、上書きはされません。
 - 既存のファイルと混ぜない別のディレクトリを `--store` に指定することを勧めます（配置の関係が未決のため。README の「現状と制限」を参照）。
 - 実物の pr-tour の書き出しでは、まだ試していません。合成データだけで確かめています。
