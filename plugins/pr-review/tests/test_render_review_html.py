@@ -1,5 +1,6 @@
 import importlib.util
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -109,6 +110,16 @@ class RenderTest(unittest.TestCase):
     def test_file_name_cannot_break_out_of_the_page(self):
         page = self.render(SAMPLE, 'a</script><script>alert(1)</script>.md')
         self.assertNotIn("<script>alert(1)</script>", page)
+
+    @unittest.skipUnless(shutil.which("node"), "node が無いため、JavaScript の構文は確かめない")
+    def test_embedded_script_is_valid_javascript(self):
+        page = self.render(SAMPLE)
+        script = page.split('<script>', 1)[1].split("</script>", 1)[0]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "page.js"
+            path.write_text(script, encoding="utf-8")
+            result = subprocess.run(["node", "--check", str(path)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_same_input_gives_the_same_page(self):
         self.assertEqual(self.render(SAMPLE), self.render(SAMPLE))

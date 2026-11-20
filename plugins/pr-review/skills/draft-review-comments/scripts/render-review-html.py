@@ -225,7 +225,7 @@ button { font:inherit; cursor:pointer; }
 code { background:var(--code); padding:1px 5px; border-radius:4px; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
 a { color:var(--accent); }
 .s { border-radius:3px; }
-.s:hover { background:var(--hover); }
+.s.focus { background:var(--hover); }
 .s.has-c { background:var(--hover); box-shadow:0 1px 0 var(--mark); }
 .s.has-c::after { content:" [" attr(data-n) "]"; font-size:12px; color:var(--accent); user-select:none; }
 .s.flash { outline:2px solid var(--accent); }
@@ -255,7 +255,7 @@ a { color:var(--accent); }
 <header>
   <h1>下書きのレビュー</h1>
   <span class="file">__FILE__</span>
-  <span class="hint">文にカーソルを合わせて 💬、または語句を選んでコメントします</span>
+  <span class="hint">文にカーソルを合わせて 💬、文をクリック、または語句を選んでコメントします</span>
   <span class="spacer"></span>
   <span id="count" class="hint">コメント 0 件</span>
   <button class="btn" id="toggleout" type="button">出力を表示</button>
@@ -288,6 +288,7 @@ __DRAFTS__
   let editing = null;
   let hovered = null;
   let hideTimer = null;
+  let switchTimer = null;
 
   const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(comments)); } catch (e) { /* 保存できなくても、画面の動きは変えない */ } };
@@ -371,6 +372,7 @@ __DRAFTS__
     editing = { sid: target.dataset.sid, quote, sentence: target.dataset.raw, line: Number(target.dataset.line) };
     $('eq').textContent = quote;
     $('et').value = '';
+    if (hovered !== target) { clearFocus(); hovered = target; target.classList.add('focus'); }
     $('editor').hidden = false;
     place($('editor'), rect.left, rect.bottom + 8);
     $('et').focus();
@@ -389,24 +391,76 @@ __DRAFTS__
     }
     closeEditor();
   }
-  function closeEditor() { editing = null; $('editor').hidden = true; }
+  function closeEditor() { editing = null; $('editor').hidden = true; clearFocus(); }
 
-  document.addEventListener('mouseover', (e) => {
-    const el = e.target.closest && e.target.closest('.s');
-    if (!el || !$('editor').hidden) return;
-    clearTimeout(hideTimer);
-    hovered = el;
-    const r = el.getClientRects()[0];
+  const SWITCH_DELAY = 200;
+  const NEAR = 80;
+  let mouse = { x: -1, y: -1 };
+  let hold = null;
+  const inside = (r, x, y) => !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  const near = (r, x, y) => !!r && Math.max(r.left - x, 0, x - r.right) <= NEAR && Math.max(r.top - y, 0, y - r.bottom) <= NEAR;
+
+  function clearFocus() {
+    clearTimeout(hideTimer); clearTimeout(switchTimer);
+    if (hovered) hovered.classList.remove('focus');
+    hovered = null; hold = null;
+    $('hoverbtn').hidden = true;
+  }
+
+  function focusOn(el) {
+    if (hovered === el) return;
+    if (hovered) hovered.classList.remove('focus');
+    hovered = el; el.classList.add('focus');
+    const rects = el.getClientRects();
+    const last = rects[rects.length - 1];
     const b = $('hoverbtn'); b.hidden = false;
-    place(b, r.left - 36 > 4 ? r.left - 36 : r.left, r.top - 2);
+    place(b, last.right - b.offsetWidth / 2, last.top - b.offsetHeight - 2);
+    const br = b.getBoundingClientRect();
+    const pad = 6;
+    const tail = Math.max(last.left, last.right - 40);
+    hold = {
+      left: Math.min(tail, br.left) - pad, right: Math.max(last.right, br.right) + pad,
+      top: Math.min(last.top, br.top) - pad, bottom: Math.max(last.bottom, br.bottom) + pad,
+    };
+  }
+
+  document.addEventListener('mousemove', (e) => { mouse = { x: e.clientX, y: e.clientY }; });
+  document.addEventListener('mouseover', (e) => {
+    mouse = { x: e.clientX, y: e.clientY };
+    if (!$('editor').hidden) return;
+    if (inside(hold, e.clientX, e.clientY)) { clearTimeout(hideTimer); clearTimeout(switchTimer); return; }
+    const el = e.target.closest && e.target.closest('.s');
+    if (!el) return;
+    clearTimeout(hideTimer); clearTimeout(switchTimer);
+    if (!hovered) { focusOn(el); return; }
+    if (el === hovered) return;
+    if (!near(hold, e.clientX, e.clientY)) { focusOn(el); return; }
+    switchTimer = setTimeout(() => {
+      if (!$('editor').hidden || inside(hold, mouse.x, mouse.y)) return;
+      const at = document.elementFromPoint(mouse.x, mouse.y);
+      const now = at && at.closest && at.closest('.s');
+      if (now) focusOn(now);
+    }, SWITCH_DELAY);
   });
-  document.addEventListener('mouseout', (e) => {
-    if (e.target.closest && e.target.closest('.s, #hoverbtn')) { clearTimeout(hideTimer); hideTimer = setTimeout(() => { if (!$('hoverbtn').matches(':hover')) $('hoverbtn').hidden = true; }, 300); }
+  document.addEventListener('mouseout', () => {
+    if (!$('editor').hidden) return;
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => { if (!inside(hold, mouse.x, mouse.y)) clearFocus(); }, 300);
   });
+  addEventListener('scroll', () => { if ($('editor').hidden) clearFocus(); }, { passive: true });
+  addEventListener('resize', () => { if ($('editor').hidden) clearFocus(); });
   $('hoverbtn').addEventListener('click', () => {
     if (!hovered) return;
-    const r = hovered.getBoundingClientRect();
-    openEditor(hovered, hovered.dataset.raw, r);
+    openEditor(hovered, hovered.dataset.raw, hovered.getBoundingClientRect());
+  });
+  document.addEventListener('click', (e) => {
+    if (!$('editor').hidden) return;
+    const t = e.target;
+    if (!t.closest || t.closest('a, button, summary, textarea, header, #panel, #editor')) return;
+    const el = t.closest('.s');
+    const sel = getSelection();
+    if (!el || (sel && !sel.isCollapsed)) return;
+    openEditor(el, el.dataset.raw, el.getBoundingClientRect());
   });
 
   function selectionTarget() {
