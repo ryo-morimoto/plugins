@@ -186,8 +186,10 @@ class StagesTest(Experiment):
         self.assertEqual(self.stage(), "B")
         self.operations()
         self.assertEqual(self.stage(), "C")
+        self.conclude()          # draft first: the brief shows it to reviewers
         self.fresh_attack()
-        self.conclude()
+        self.assertEqual(self.stage(), "C")   # the user has not chosen yet
+        self.add("decision", {"what": "take option 1"}, author="user")
         self.assertEqual(self.stage(), "D")
         self.add("review", {"by_whom": "user", "text": "known result", "value": {"novelty": "low"}})
         self.add("close", {"state": "concluded"})
@@ -315,6 +317,67 @@ class KnownFailuresTest(Experiment):
         _, ctx, _ = self.state()
         step = rules.next_step(store.load_rules(), ctx)
         self.assertEqual(step["stage"], "C")
+
+
+class EvalFindingsTest(Experiment):
+    """Problems the first prose-vs-te evaluation runs reported."""
+
+    def test_brief_carries_the_draft_conclusion(self):
+        self.stage_a()
+        self.operations()
+        self.conclude()
+        run("brief", str(self.d), "--lens", "method")
+        text = next((self.d / "briefs").glob("*-method.md")).read_text(encoding="utf-8")
+        self.assertIn("## Premises", text)
+        self.assertIn("conclusion event", text)
+
+    def test_user_choice_must_follow_the_last_conclusion(self):
+        self.stage_a()
+        self.operations()
+        self.conclude()
+        self.fresh_attack()
+        self.add("decision", {"what": "option 1"}, author="user")
+        self.add("conclusion", {"answer": "revised", "answer_rival": "R2", "supersedes": 12,
+                                "premises": [{"pid": "P1", "text": "fact", "label": "argued"}]})
+        st, _, _ = self.state()
+        self.assertEqual(st["conclusion"]["answer"], "revised")
+        self.assertEqual(self.stage(), "C")
+
+    def test_run_with_a_relative_path(self):
+        import os
+        (self.d / "scripts" / "a.py").write_text("import os, pathlib\npathlib.Path(os.environ['TE_OUTPUTS'], 'a.txt').write_text('1')\n", encoding="utf-8")
+        cwd = os.getcwd()
+        os.chdir(self.d.parent)
+        try:
+            self.assertEqual(run("run", self.d.name)[0], 0)
+        finally:
+            os.chdir(cwd)
+        self.assertTrue((self.d / "outputs/a.txt").exists())
+
+    def test_option_abbreviations_are_refused(self):
+        with self.assertRaises(SystemExit):
+            run("add", str(self.d), "decision", "--json", '{"what": "w"}', "--note", "hello")
+
+    def test_schema_command(self):
+        code, out, _ = run("schema", "operation")
+        self.assertEqual(code, 0)
+        self.assertIn('"status": "eliminated | weakened | unchanged | supported | undecidable"', out)
+
+    def test_absence_checked_by_search(self):
+        self.stage_a()
+        self.operations()
+        self.add("conclusion", {"answer": "A", "answer_rival": "R2", "premises": [
+            {"pid": "P1", "text": "no such order was issued", "label": "empirical-checked",
+             "searched": [{"query": "高齢者等避難 前倒し", "scope": "内閣府 防災情報のページ", "results": 0}]}]})
+        self.assertNotIn("checked-needs-primary", self.errors())
+
+    def test_duplicate_source_can_be_removed_unless_cited(self):
+        self.stage_a()
+        self.source("dup")
+        self.assertEqual(run("source", "rm", str(self.d), "dup")[0], 0)
+        self.assertNotIn("dup", store.read_sources(self.d))
+        with self.assertRaises(SystemExit):
+            run("source", "rm", str(self.d), "rep")   # cited by prior_answer
 
 
 class SourcesTest(Experiment):

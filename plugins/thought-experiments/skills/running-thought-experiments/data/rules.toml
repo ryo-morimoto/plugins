@@ -32,9 +32,10 @@ id = "C"
 name = "attack and conclude"
 show = ["independent-attack", "conclude", "compare-prediction"]
 requires = [
+  { pred = "has", kind = "conclusion", message = "Draft the conclusion as labelled premises with citations (conclusion). The brief shows reviewers this draft, so write it before te brief." },
   { pred = "fresh_attack_with_artifacts", message = "Get the attack from fresh reviewers: save the brief with `te brief`, record their reply with `te brief --record-response`, then add an attack event that points to both files." },
-  { pred = "objections_answered", message = "Answer every objection with a response and a reason (attack.objections)." },
-  { pred = "has", kind = "conclusion", message = "State the conclusion as labelled premises with citations (conclusion)." },
+  { pred = "objections_answered", message = "Answer every objection with a response and a reason (attack.objections). If an objection changes the result, add a new conclusion with supersedes." },
+  { pred = "user_chose", message = "Show the surviving options side by side and let the user choose; record the choice as a decision with author user, after the last conclusion." },
 ]
 
 [[stage]]

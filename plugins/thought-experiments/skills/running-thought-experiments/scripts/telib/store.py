@@ -230,6 +230,19 @@ def source_add(d: Path, sid: str, url: str | None, file: Path | None, title: str
     return rec
 
 
+def source_rm(d: Path, sid: str, referenced: bool) -> None:
+    """Remove a source nothing cites (for a duplicate added by mistake)."""
+    sources = read_sources(d)
+    if sid not in sources:
+        raise SystemExit(f"no source {sid!r}")
+    if referenced:
+        raise SystemExit(f"source {sid!r} is cited by an event; add a correction instead of removing it")
+    del sources[sid]
+    write_sources(d, sources)
+    for p in (d / "sources/raw").glob(f"{sid}.*"):
+        p.unlink()
+
+
 # ---------- scripts and outputs ----------
 
 def _scripts(d: Path) -> list[Path]:
@@ -239,10 +252,10 @@ def _scripts(d: Path) -> list[Path]:
 def run_scripts(d: Path, out_dir: Path) -> list[str]:
     """Run each scripts/*.py with TE_OUTPUTS pointing at out_dir. Returns failure messages."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    env = dict(os.environ, TE_OUTPUTS=str(out_dir), PYTHONHASHSEED="0")
+    env = dict(os.environ, TE_OUTPUTS=str(out_dir.resolve()), PYTHONHASHSEED="0")
     fails = []
     for s in _scripts(d):
-        r = subprocess.run([sys.executable, "-I", str(s)], cwd=d, env=env, capture_output=True, text=True)
+        r = subprocess.run([sys.executable, "-I", str(s.resolve())], cwd=d, env=env, capture_output=True, text=True)
         if r.returncode != 0:
             fails.append(f"{s.relative_to(d)} exited {r.returncode}: {r.stderr.strip().splitlines()[-1] if r.stderr.strip() else ''}")
     return fails

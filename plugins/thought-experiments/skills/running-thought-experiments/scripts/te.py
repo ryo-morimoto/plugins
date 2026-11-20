@@ -8,8 +8,10 @@ in, what is missing, and shows the short instructions for that stage.
   te next <dir> [--json] [--all] [--lang ja]      stage, what is missing, instructions, score
   te add <dir> <kind> --json '{...}' [--author A] [--note-file F]
                                                   append an event (validated; the only writer)
+  te schema <kind>                                the fields an event of that kind takes
   te source add <dir> <id> (--url U | --file F) [--title T] [--quote TEXT --page N]...
                                                   fetch or read a source, record sha256, verify quotes
+  te source rm <dir> <id>                         remove a source nothing cites (a duplicate)
   te brief <dir> --lens <lens>                    save a reviewer brief to briefs/, print its sha256
   te brief <dir> --record-response <brief> <file> save a reviewer's reply next to its brief
   te run <dir>                                    run scripts/*.py into outputs/ (TE_OUTPUTS)
@@ -158,6 +160,45 @@ def cmd_source(a) -> int:
     return 0
 
 
+def cmd_source_rm(a) -> int:
+    d = Path(a.dir)
+    events, _ = store.read_events(d)
+    text = json.dumps(events, ensure_ascii=False)
+    store.source_rm(d, a.id, referenced=json.dumps(a.id, ensure_ascii=False) in text)
+    print(f"removed source {a.id}")
+    return 0
+
+
+def _shape(s: dict, root: dict, depth: int = 0):
+    """A compact picture of what a schema accepts, for te schema."""
+    if "$ref" in s:
+        t = root
+        for part in s["$ref"][2:].split("/"):
+            t = t[part]
+        return _shape(t, root, depth)
+    if "enum" in s:
+        return " | ".join(map(str, s["enum"]))
+    if "anyOf" in s:
+        return " | ".join(str(_shape(x, root, depth)) for x in s["anyOf"])
+    t = s.get("type")
+    if t == "object" and "properties" in s and depth < 4:
+        req = set(s.get("required", []))
+        return {(k if k in req else k + "?"): _shape(v, root, depth + 1) for k, v in s["properties"].items()
+                if k not in ("id", "v", "at", "kind", "author")}
+    if t == "object" and isinstance(s.get("additionalProperties"), dict):
+        return {"<key>": _shape(s["additionalProperties"], root, depth + 1)}
+    if t == "array":
+        return [_shape(s.get("items", {}), root, depth + 1)]
+    return t or "any"
+
+
+def cmd_schema(a) -> int:
+    sch = store.load_schema()
+    print(f"te add <dir> {a.kind} --json '<object>'   (fields ending in ? are optional)")
+    print(json.dumps(_shape(sch["$defs"][a.kind], sch), ensure_ascii=False, indent=1))
+    return 0
+
+
 def cmd_brief(a) -> int:
     d = Path(a.dir)
     state, _, _ = _load(d)
@@ -274,13 +315,17 @@ def cmd_lock(a) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="te", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    sub = p.add_subparsers(dest="cmd", required=True)
+    # allow_abbrev=False: "--note" must not silently mean "--note-file" (a real run crashed on it)
+    p = argparse.ArgumentParser(prog="te", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, allow_abbrev=False)
+    sub = p.add_subparsers(dest="cmd", required=True, parser_class=lambda **kw: argparse.ArgumentParser(allow_abbrev=False, **kw))
     s = sub.add_parser("init"); s.add_argument("dir"); s.add_argument("--id", required=True); s.set_defaults(fn=cmd_init)
     s = sub.add_parser("next"); s.add_argument("dir"); s.add_argument("--json", action="store_true"); s.add_argument("--all", action="store_true", help="unmet requirements of every stage (audit)"); s.add_argument("--lang", default="en", choices=["en", "ja"]); s.set_defaults(fn=cmd_next)
     s = sub.add_parser("add"); s.add_argument("dir"); s.add_argument("kind", choices=KINDS); s.add_argument("--json", required=True)
     s.add_argument("--author", default="claude"); s.add_argument("--note-file"); s.set_defaults(fn=cmd_add)
-    src = sub.add_parser("source").add_subparsers(dest="sub", required=True).add_parser("add")
+    srcs = sub.add_parser("source").add_subparsers(dest="sub", required=True, parser_class=lambda **kw: argparse.ArgumentParser(allow_abbrev=False, **kw))
+    s = srcs.add_parser("rm"); s.add_argument("dir"); s.add_argument("id"); s.set_defaults(fn=cmd_source_rm)
+    s = sub.add_parser("schema"); s.add_argument("kind", choices=KINDS); s.set_defaults(fn=cmd_schema)
+    src = srcs.add_parser("add")
     src.add_argument("dir"); src.add_argument("id"); src.add_argument("--url"); src.add_argument("--file"); src.add_argument("--title")
     src.add_argument("--quote", action="append"); src.add_argument("--page", action="append", type=int); src.set_defaults(fn=cmd_source)
     s = sub.add_parser("brief"); s.add_argument("dir"); s.add_argument("--lens"); s.add_argument("--record-response", nargs=2, metavar=("BRIEF", "FILE"))

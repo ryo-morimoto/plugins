@@ -80,6 +80,15 @@ def p_objections_answered(ctx: Ctx, **_) -> list[str]:
     return out
 
 
+def p_user_chose(ctx: Ctx, **_) -> list[str]:
+    c = ctx["state"]["conclusion"]
+    if not c:
+        return ["no conclusion yet"]
+    if any(e["author"] == "user" and e["id"] > c["id"] for e in _events(ctx, "decision")):
+        return []
+    return [f"no decision by the user after conclusion event {c['id']}"]
+
+
 # ---------- invariants ----------
 
 def i_refs_exist(ctx: Ctx, **_) -> list[str]:
@@ -119,7 +128,7 @@ def i_refs_exist(ctx: Ctx, **_) -> list[str]:
             out.append(f"{where}: accepts event {e['accepts']} which does not exist")
         if e["kind"] == "supersede" and e["target"] not in ids:
             out.append(f"{where}: target event {e['target']} does not exist")
-        if e["kind"] == "frame" and "supersedes" in e and e["supersedes"] not in ids:
+        if e["kind"] in ("frame", "conclusion") and "supersedes" in e and e["supersedes"] not in ids:
             out.append(f"{where}: supersedes event {e['supersedes']} which does not exist")
         if e["kind"] == "correction":
             t = e["target"]
@@ -146,7 +155,9 @@ def i_checked_needs_primary(ctx: Ctx, **_) -> list[str]:
             continue
         cits = p.get("citations", [])
         if not cits:
-            out.append(f"premise {p['pid']}: empirical-checked without citations")
+            # An absence ("no such record exists") is checked by searching, not by citing.
+            if not p.get("searched"):
+                out.append(f"premise {p['pid']}: empirical-checked without citations (for an absence, record the searches in searched)")
             continue
         for c in cits:
             if c["level"] == "primary":
@@ -273,6 +284,7 @@ PREDICATES: dict[str, Callable[..., list[str]]] = {
     "prior_answer_evidence": p_prior_answer_evidence,
     "fresh_attack_with_artifacts": p_fresh_attack_with_artifacts,
     "objections_answered": p_objections_answered,
+    "user_chose": p_user_chose,
     "refs_exist": i_refs_exist,
     "checked_needs_primary": i_checked_needs_primary,
     "unobtainable_is_unverified": i_unobtainable_is_unverified,
