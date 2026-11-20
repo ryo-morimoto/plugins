@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""pr-tour の JSON 書き出し v1 のコメントを、records.md の書式の finding として store に取り込む。"""
+"""pr-tour の JSON 書き出し v1 のコメントを、リポジトリの内容と照合したうえで、records.md の書式の finding として store に取り込む。"""
 
 import argparse
 import hashlib
 import json
 import re
 import secrets
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,8 +47,10 @@ def validate_comment(comment, index):
     where = f"comments[{index}]"
     if not isinstance(comment, dict):
         raise InputError(f"{where}: オブジェクトではありません")
-    for key in ("id", "path", "body", "createdAt"):
+    for key in ("id", "path", "body", "createdAt", "code"):
         require_text(comment, key, where)
+    if not isinstance(comment.get("commit"), str) or not SHA.fullmatch(comment["commit"]):
+        raise InputError(f"{where}: `commit` が、40 桁の 16 進ではありません")
     if comment.get("side") not in SIDES:
         raise InputError(f"{where}: `side` が left か right ではありません")
     start = require_line(comment, "startLine", where)
@@ -104,6 +107,53 @@ def load_export(path):
         raise InputError(f"{path} が JSON として読めません: {error}") from error
     validate_export(data)
     return data
+
+
+def read_blob(repo, commit, path):
+    result = subprocess.run(
+        ["git", "-C", str(repo), "cat-file", "blob", f"{commit}:{path}"],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise InputError(f"{commit[:7]}:{path} を読めません（commit が手元に無い（fetch が要る）か、path がその commit に無い）: {detail}")
+    try:
+        return result.stdout.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise InputError(f"{commit[:7]}:{path} が UTF-8 のテキストではありません") from error
+
+
+def lines_of(text):
+    lines = text.replace("\r\n", "\n").split("\n")
+    if lines and lines[-1] == "":
+        lines.pop()
+    return lines
+
+
+def verify_code(comment, index, repo):
+    where = f"comments[{index}]（{comment['id']}）"
+    try:
+        lines = lines_of(read_blob(repo, comment["commit"], comment["path"]))
+    except InputError as error:
+        raise InputError(f"{where}: {error}") from error
+    start, end = comment["startLine"], comment["endLine"]
+    if end > len(lines):
+        raise InputError(f"{where}: {end} 行目が、{comment['commit'][:7]}:{comment['path']} にありません（{len(lines)} 行）")
+    actual = "\n".join(lines[start - 1 : end]).rstrip("\n")
+    expected = comment["code"].replace("\r\n", "\n").rstrip("\n")
+    if actual != expected:
+        raise InputError(f"{where}: `code` が、{comment['commit'][:7]}:{comment['path']} の {start}-{end} 行目と一致しません")
+
+
+def verify_export(export, repo):
+    problems = []
+    for index, comment in enumerate(export["comments"]):
+        try:
+            verify_code(comment, index, repo)
+        except InputError as error:
+            problems.append(str(error))
+    if problems:
+        raise InputError("書き出しの位置が、リポジトリの内容と合いません。取り込みを中止しました。\n  " + "\n  ".join(problems))
 
 
 def json_value(value):
@@ -287,6 +337,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="pr-tour の JSON 書き出し v1 を、finding の記録として取り込みます。")
     parser.add_argument("--store", required=True, type=Path, help="記録の置き場所の根")
     parser.add_argument("--from", dest="source", required=True, help="pr-tour の JSON 書き出し")
+    parser.add_argument("--repo", required=True, type=Path, help="対象のリポジトリ（コメントの commit・path・行を照合する）")
     parser.add_argument("--series", default=None, help="pull の series（同じ取り組みのまとまり）")
     parser.add_argument("--created-by", default="unknown", help="finding の created_by")
     parser.add_argument("--dry-run", action="store_true", help="何も書かず、作る予定を表示する")
@@ -295,6 +346,7 @@ def main(argv=None):
     moment = datetime.now(timezone.utc)
     try:
         export = load_export(args.source)
+        verify_export(export, args.repo)
         owner, repo, number = parse_pr_url(export["prUrl"])
         pull_dir = args.store / "pulls" / owner / repo / str(number)
         plan = build_plan(export, pull_dir, args.series, args.created_by, moment)

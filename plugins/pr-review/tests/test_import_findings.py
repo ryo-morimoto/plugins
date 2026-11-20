@@ -33,6 +33,24 @@ def load_module():
     return module
 
 
+GIT = ["git", "-c", "user.name=test", "-c", "user.email=test@example.invalid", "-c", "commit.gpgsign=false"]
+
+
+def make_repo(directory, export):
+    """書き出しの各コメントが指す行を持つファイルだけの、一時的なリポジトリを作る。"""
+    directory.mkdir()
+    for comment in export["comments"]:
+        target = directory / comment["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        filler = [f"// line {number}" for number in range(1, comment["startLine"])]
+        target.write_text("\n".join(filler + comment["code"].split("\n") + ["// end"]) + "\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", str(directory)], check=True)
+    subprocess.run([*GIT, "-C", str(directory), "add", "."], check=True)
+    subprocess.run([*GIT, "-C", str(directory), "commit", "-q", "-m", "fixture"], check=True)
+    result = subprocess.run(["git", "-C", str(directory), "rev-parse", "HEAD"], check=True, capture_output=True, text=True)
+    return result.stdout.strip()
+
+
 def read_record(path):
     lines = path.read_text(encoding="utf-8").split("\n")
     assert lines[0] == "---"
@@ -52,6 +70,10 @@ class ImportFindingsTest(unittest.TestCase):
         self.tmp = Path(directory.name)
         self.store = self.tmp / "store"
         self.export = json.loads(FIXTURE.read_text(encoding="utf-8"))
+        self.repo = self.tmp / "repo"
+        self.commit = make_repo(self.repo, self.export)
+        for comment in self.export["comments"]:
+            comment["commit"] = self.commit
 
     def write_export(self, data, name="export.json"):
         path = self.tmp / name
@@ -59,9 +81,9 @@ class ImportFindingsTest(unittest.TestCase):
         return path
 
     def run_import(self, *extra, source=None):
-        source = source or FIXTURE
+        source = source or self.write_export(self.export, "default.json")
         return subprocess.run(
-            [sys.executable, str(SCRIPT), "--store", str(self.store), "--from", str(source), *extra],
+            [sys.executable, str(SCRIPT), "--store", str(self.store), "--repo", str(self.repo), "--from", str(source), *extra],
             capture_output=True,
             text=True,
         )
@@ -232,6 +254,10 @@ class ImportFindingsTest(unittest.TestCase):
             "id が重複": mutate(lambda d: d["comments"][1].update(id="c-001")),
             "body が空": mutate(lambda d: d["comments"][0].update(body="\n\n")),
             "head が 40 桁でない": mutate(lambda d: d.update(head="abc")),
+            "commit が無い": mutate(lambda d: d["comments"][0].pop("commit")),
+            "commit が 40 桁でない": mutate(lambda d: d["comments"][0].update(commit="abc")),
+            "code が無い": mutate(lambda d: d["comments"][0].pop("code")),
+            "code が空": mutate(lambda d: d["comments"][0].update(code="")),
         }
         for name, data in cases.items():
             with self.subTest(name):
@@ -239,6 +265,59 @@ class ImportFindingsTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
                 self.assertIn("エラー", result.stderr)
                 self.assertFalse(self.store.exists())
+
+    def assert_rejected(self, data, *messages, extra=()):
+        result = self.run_import(*extra, source=self.write_export(data))
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        for message in messages:
+            self.assertIn(message, result.stderr)
+        self.assertFalse(self.store.exists())
+
+    def test_code_that_differs_from_the_repository_is_rejected(self):
+        self.export["comments"][1]["code"] = "export const MAX_DISCOUNT = 0.8;"
+        self.assert_rejected(self.export, "c-002", "一致しません")
+
+    def test_trailing_whitespace_difference_is_rejected(self):
+        self.export["comments"][1]["code"] += " "
+        self.assert_rejected(self.export, "c-002")
+
+    def test_line_range_beyond_the_file_is_rejected(self):
+        self.export["comments"][0].update(startLine=40, endLine=42)
+        self.assert_rejected(self.export, "c-001", "にありません")
+
+    def test_every_mismatch_is_reported_at_once(self):
+        self.export["comments"][0]["code"] = "x"
+        self.export["comments"][2]["code"] = "y"
+        self.assert_rejected(self.export, "c-001", "c-003")
+
+    def test_commit_missing_from_the_repository_is_rejected(self):
+        self.export["comments"][0]["commit"] = "9" * 40
+        self.assert_rejected(self.export, "c-001", "fetch")
+
+    def test_path_missing_at_the_commit_is_rejected(self):
+        self.export["comments"][0]["path"] = "src/cart/other.ts"
+        self.assert_rejected(self.export, "c-001", "読めません")
+
+    def test_dry_run_also_verifies(self):
+        self.export["comments"][0]["code"] = "x"
+        self.assert_rejected(self.export, "c-001", extra=("--dry-run",))
+
+    def test_repo_is_required(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--store", str(self.store), "--from", str(FIXTURE)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--repo", result.stderr)
+
+    def test_crlf_files_match_lf_code(self):
+        target = self.repo / "src/cart/discount.ts"
+        target.write_bytes(target.read_bytes().replace(b"\n", b"\r\n"))
+        subprocess.run([*GIT, "-C", str(self.repo), "commit", "-q", "-a", "-m", "crlf"], check=True)
+        head = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True, capture_output=True, text=True)
+        self.export["comments"][1]["commit"] = head.stdout.strip()
+        self.assertEqual(self.run_import(source=self.write_export(self.export)).returncode, 0)
 
     def test_unreadable_input_exits_2(self):
         broken = self.tmp / "broken.json"

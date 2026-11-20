@@ -19,7 +19,7 @@ description: PR のレビューコメントの下書きを作る。レビュー�
 
 ### 1. 気づきを取り込む
 
-`references/intake.md` に従います。pr-tour の JSON なら、`<skill>/scripts/import-findings.py` で取り込みます（先に `--dry-run`）。
+`references/intake.md` に従います。pr-tour の JSON なら、`<skill>/scripts/import-findings.py` で取り込みます（`--repo` に対象のリポジトリを渡し、先に `--dry-run`）。
 
 記録の置き場所（`--store`）は、XDG の仕様に従い、`${XDG_DATA_HOME:-$HOME/.local/share}/pr-review` を使います。
 
