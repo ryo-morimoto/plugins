@@ -1,0 +1,79 @@
+# 画面の検査用の地図。7 つの状態と、軸の札の組み合わせ（自作の分類・標準で出典未確認）をすべて含む。
+title = "画面の検査用の地図"
+question = "地図の画面は、すべての状態を読みやすく表示できるか"
+
+[rows]
+name = "行の軸"
+basis = "own"
+ref = "https://example.org/rows"
+ref_title = "自作の分類の例"
+ref_read = true
+
+[[rows.values]]
+id = "a"
+name = "行 A"
+
+[[rows.values]]
+id = "b"
+name = "行 B（長い名前で折り返しを確かめる）"
+
+[[rows.values]]
+id = "c"
+name = "行 C"
+
+[cols]
+name = "列の軸"
+basis = "standard"
+ref = "https://example.org/cols"
+ref_title = "標準の分類の例"
+ref_read = false
+
+[[cols.values]]
+id = "x"
+name = "列 X"
+
+[[cols.values]]
+id = "y"
+name = "列 Y"
+
+[[cols.values]]
+id = "z"
+name = "列 Z"
+
+[[cells]]
+row = "a"
+col = "x"
+status = "supported"
+claim = "根拠のある結論の例。https://example.org/a/very/long/path/that/must/wrap/without/overflowing のような長い文字列も含む。"
+evidence = ["https://example.org/evidence"]
+
+[[cells]]
+row = "a"
+col = "y"
+status = "refuted"
+claim = "否定された仮説の例。"
+evidence = ["https://example.org/evidence"]
+
+[[cells]]
+row = "a"
+col = "z"
+status = "hypothesis"
+claim = "裏付けのない仮説の例。"
+
+[[cells]]
+row = "b"
+col = "x"
+status = "contested"
+claim = "根拠が衝突している例。"
+
+[[cells]]
+row = "b"
+col = "y"
+status = "open"
+next_question = "問いだけが置かれている例。"
+
+[[cells]]
+row = "b"
+col = "z"
+status = "out_of_scope"
+claim = "この地図では扱わない例。"
