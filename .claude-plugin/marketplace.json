@@ -40,6 +40,12 @@
       "description": "Rust の性能改善を、システムの指標で測り、振る舞いが変わらないことを証明しながら進める",
       "source": "./plugins/rust-perf-surgery",
       "category": "development"
+    },
+    {
+      "name": "issue-understanding",
+      "description": "課題やバグ報告を理解し評価する記録を下書きする。報告者の主張と確かめた証拠を分け、判断は人に任せる",
+      "source": "./plugins/issue-understanding",
+      "category": "development"
     }
   ]
 }

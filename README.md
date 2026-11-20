@@ -13,6 +13,7 @@
 | [maintainer-judgment](plugins/maintainer-judgment/README.md) | 削除・名前変更、機能の要望への返答、既定値、標準の UI 部品か自作か、を判断するときの、複数の OSS で見られたパターン |
 | [skill-tuning](plugins/skill-tuning/README.md) | skill の指示が振る舞いを変えているかを測り、効いていない指示を削る |
 | [rust-perf-surgery](plugins/rust-perf-surgery/README.md) | Rust の性能改善を、システムの指標で測り、振る舞いが変わらないことを証明しながら進める |
+| [issue-understanding](plugins/issue-understanding/README.md) | 課題やバグ報告を理解し評価する記録を下書きする。報告者の主張と確かめた証拠を分け、判断は人に任せる |
 <!-- plugins:end -->
 
 plugin の使い方は、それぞれの README を見てください。
