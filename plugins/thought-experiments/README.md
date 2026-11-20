@@ -16,7 +16,13 @@
 /plugin install thought-experiments --marketplace ryo-morimoto/plugins
 ```
 
-この行は `claude plugin validate` が示した形で、インストールそのものは試していません。
+2026-11-21 に、Claude Code 2.1.329 で、次のことを確かめました。
+
+- 一時的な設定ディレクトリ（`CLAUDE_CONFIG_DIR`）で、ローカルの clone を marketplace として追加し、`claude plugin install thought-experiments@ryo-morimoto-plugins --scope user` が通った。GitHub からの追加（上の行）は、main に入ってから試す。
+- `--plugin-dir` で読み込んだセッションで、2 つの skill が `thought-experiments:` の名前空間で見え、`/thought-experiments:mapping-thought-experiments maps/<name> <row>/<col>`（`map.html` の「コピー」と同じ形）で呼ぶと、引数のセルから始めて `running-thought-experiments` に引き継いだ。
+- 自動起動: 「この地図で次にどこを考えるべき？」では `mapping-thought-experiments` が、「思考実験しよう。もし〜」では `running-thought-experiments` が選ばれた（各 1 回）。
+
+claude.ai に同じ `running-thought-experiments` を上げていると、2 つが並んで見えます。どちらか一方にしてください。
 
 ## 構成
 
@@ -74,6 +80,6 @@ python3 <skill>/scripts/thought_map.py check                  # 形式と map.ht
 
 ## 未確認のこと
 
-- skill の自動起動（質問から自動で選ばれるか）と、2 つの skill の間で取り違えが起きないか。
-- `map.html` の「コピー」が渡すコマンドの形（`<plugin>:<skill>` と引数）で、Claude Code が skill を呼べるか。
+- 自動起動を確かめたのは、依頼文 2 つを 1 回ずつだけ。言い回しを変えたときの取り違えは見ていない。
+- GitHub の marketplace（`ryo-morimoto/plugins`）からのインストール。
 - 根の `plugin.json` が標準の schema に合うか（機械的には検証していない）。
