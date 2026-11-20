@@ -387,6 +387,24 @@ class VersionTest(unittest.TestCase):
             self.assertEqual(run("version", "--verify", str(lock))[0], 1)
 
 
+class CommitTest(unittest.TestCase):
+    def test_untracked_copy_inside_another_repo_reports_no_commit(self):
+        # A copy of the skill inside a user's repository must not report the user's commit.
+        import shutil
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            (repo / "x").write_text("x")
+            subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "add", "x"], cwd=repo, check=True)
+            subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "x"], cwd=repo, check=True)
+            copy = repo / "skill"
+            shutil.copytree(SCRIPTS.parent, copy, ignore=shutil.ignore_patterns("__pycache__", "evals"))
+            out = subprocess.run([sys.executable, "-I", str(copy / "scripts/te.py"), "version"], capture_output=True, text=True,
+                                 env={"PATH": "/usr/bin:/bin"}).stdout
+            self.assertIn("commit=unknown", out)
+
+
 class DataTest(unittest.TestCase):
     def test_rules_name_only_known_predicates_and_instructions(self):
         rl, instr = store.load_rules(), store.load_instructions()

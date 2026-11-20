@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "thought-experiments",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "思考実験を、問いの設定から結果への攻撃まで一緒に回す。複数の実験をまたいで、標準や論文の分類を軸にした地図に結論を書き戻し、空いているセルと次の推論の方向を選べるようにする。",
   "license": "MIT",
   "keywords": [

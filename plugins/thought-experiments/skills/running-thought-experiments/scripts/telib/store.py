@@ -283,8 +283,18 @@ def bundle_sha256() -> str:
 
 
 def git_commit() -> str | None:
-    r = subprocess.run(["git", "rev-parse", "HEAD"], cwd=SKILL, capture_output=True, text=True)
-    return r.stdout.strip() if r.returncode == 0 else os.environ.get("TE_COMMIT")
+    """The commit te's own files come from, or None.
+
+    HEAD alone is wrong when the skill sits untracked inside another repository (a copy in a
+    user's repo would report the user's commit). So the commit counts only if te.py is tracked
+    there; local edits to te's files add "+dirty"."""
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=SKILL, capture_output=True, text=True)
+    head = git("rev-parse", "HEAD")
+    if head.returncode != 0 or git("ls-files", "--error-unmatch", "scripts/te.py").returncode != 0:
+        return os.environ.get("TE_COMMIT")
+    dirty = git("status", "--porcelain", "--", "scripts", "data").stdout.strip()
+    return head.stdout.strip() + ("+dirty" if dirty else "")
 
 
 def read_lock(p: Path) -> dict:
