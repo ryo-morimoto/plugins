@@ -7,4 +7,4 @@
 - **Conventions are a tool, not a solution.** If something can enforce the assumption (a type, a constructor, a wrapping layer), prefer that to a naming convention. Use a convention when enforcement costs too much. Do not take comfort from merely having one.
 - **When an assumption behind a name proves false,** pick one: widen the model, wrap it in a layer, adopt a convention, or narrow the intended use. Say which.
 
-Precedence when choosing a form: this codebase's own practice (see `survey.md`), then the language pack, then the defaults here.
+Precedence when choosing a form: this codebase's own practice when the user asks to follow it (see `survey.md`), then the language pack, then the defaults here.

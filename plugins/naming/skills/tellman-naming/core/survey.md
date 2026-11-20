@@ -1,6 +1,6 @@
 # Find the codebase's own practice
 
-"Match the existing code" only works if you look. Do this before judging or choosing a name.
+Use this only when the user asks to match the codebase's own practice. By default, judge by the rules in `core/` alone. "Match the existing code" only works if you look.
 
 1. **Classify what is named:** map or dictionary; sequence; pair or tuple; boolean or predicate; conversion; function that reads from outside; function that writes; constructor; type; module; parameter of a public function.
 2. **Collect at least ten existing names of the same kind,** nearest first: same file, same module, then the whole repository. List definitions with a search, for example:
@@ -15,4 +15,3 @@
    - Fewer than five examples: say the sample is too small and use the pack.
 5. **State the tally in one line** with your verdict, so the reader can check it.
 
-Also search every use of the name under review before judging it: a name is read at its uses, not at its definition.

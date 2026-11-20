@@ -18,6 +18,12 @@
       "category": "productivity"
     },
     {
+      "name": "naming",
+      "description": "Tellman の方法で名前を付ける・変える。範囲をまとめて直すときは、名前を数え上げ、指摘がなくなるまで繰り返し、判定を台帳に残す",
+      "source": "./plugins/naming",
+      "category": "development"
+    },
+    {
       "name": "maintainer-judgment",
       "description": "削除・名前変更、機能の要望への返答、既定値、標準の UI 部品か自作か、を判断するときの、複数の OSS で見られたパターン",
       "source": "./plugins/maintainer-judgment",
@@ -27,12 +33,6 @@
       "name": "skill-tuning",
       "description": "skill の指示が振る舞いを変えているかを測り、効いていない指示を削る",
       "source": "./plugins/skill-tuning",
-      "category": "development"
-    },
-    {
-      "name": "tellman-naming",
-      "description": "名前を付けるか、何と呼ぶか、変えるべきかを、Zach Tellman の考え方で判断する",
-      "source": "./plugins/tellman-naming",
       "category": "development"
     },
     {
