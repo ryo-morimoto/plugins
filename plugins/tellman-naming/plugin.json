@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "tellman-naming",
+  "version": "0.1.0",
+  "description": "Decide whether to name something, what to call it, and whether an existing name should change, using Zach Tellman's approach (Elements of Clojure). Use when creating, renaming or reviewing identifiers, extracting functions or variables, or adding modules, types or public interfaces.",
+  "license": "MIT",
+  "keywords": [
+    "naming",
+    "identifiers",
+    "refactoring",
+    "code-review"
+  ]
+}

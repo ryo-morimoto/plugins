@@ -1,0 +1,15 @@
+{
+  "name": "rust-perf-surgery",
+  "version": "0.1.0",
+  "description": "Rust performance work (CPU, memory, IO, caching, reuse, data-structure choice) that moves the system metric and proves behavior stays identical. Use for any Rust speedup, profiling or benchmarking.",
+  "author": {
+    "name": "Ryo Morimoto"
+  },
+  "keywords": [
+    "rust",
+    "performance",
+    "profiling",
+    "benchmarking"
+  ],
+  "license": "MIT"
+}

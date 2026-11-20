@@ -1,0 +1,74 @@
+{
+  "model": "sonnet",
+  "effort": "medium",
+  "trials": [
+    "t1",
+    "t2",
+    "t3"
+  ],
+  "conditions": [
+    {
+      "name": "with_skill",
+      "skill": "/abs/path/to/skill-v2"
+    },
+    {
+      "name": "old_skill",
+      "skill": "/abs/path/to/skill-v1"
+    },
+    {
+      "name": "without_skill"
+    }
+  ],
+  "tasks": [
+    {
+      "name": "rename-seq-of",
+      "prompt": "The repository at /abs/path/to/tree is a library that you maintain.\n\nLook at the name `seq-of` in `src/core.clj` (line 81). Decide whether to keep this name or change it. Read whatever else you need. Do not edit the repository.\n\nWrite your answer to {out}/answer.json as JSON of the form {\"decision\":\"keep\" or \"change\",\"new\":\"<name or null>\",\"why\":\"<one or two sentences>\"}.",
+      "expect": "keep",
+      "measures": [
+        "decision"
+      ]
+    },
+    {
+      "name": "add-parser",
+      "prompt": "The repository at /abs/path/to/repo is a project that you maintain.\n\nAdd to `src/utils.ts`, in the style of that file: one function that parses comma-separated `key=value` pairs into a map. Do not edit the repository.\n\nWrite the new code, and nothing else, to {out}/answer.ts.",
+      "measures": [
+        "locals",
+        "functions"
+      ]
+    }
+  ],
+  "measures": {
+    "decision": {
+      "type": "decision",
+      "file": "answer.json"
+    },
+    "locals": {
+      "type": "occurrences",
+      "file": "answer.*",
+      "patterns": {
+        "ts": [
+          "^\\s+(?:const|let|var)\\s"
+        ],
+        "rs": [
+          "^\\s+let\\s"
+        ],
+        "clj": "builtin:clj-bindings"
+      }
+    },
+    "functions": {
+      "type": "occurrences",
+      "file": "answer.*",
+      "patterns": {
+        "ts": [
+          "^(?:export\\s+)?(?:async\\s+)?function\\s"
+        ],
+        "rs": [
+          "^\\s*(?:pub\\s+)?fn\\s"
+        ],
+        "clj": [
+          "^\\(defn-?\\s"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: limits-pile-up
+expected_outcome: |
+  The answer recommends planning a custom picker
+  The answer cites the product inconsistency (quick open cannot use the OS picker) as a reason
+  The answer cites the several requests blocked by the same limit as a reason
+  The answer cites the breaking workaround as a reason
+  The answer says the custom picker should stay close to native look and behavior
+  The answer says to stop extending the existing hack

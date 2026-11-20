@@ -16,6 +16,30 @@
       "description": "思考実験を一緒に回し、標準や論文の分類を軸にした地図で、空いているところと次の推論の方向を選べるようにする",
       "source": "./plugins/thought-experiments",
       "category": "productivity"
+    },
+    {
+      "name": "maintainer-judgment",
+      "description": "削除・名前変更、機能の要望への返答、既定値、標準の UI 部品か自作か、を判断するときの、複数の OSS で見られたパターン",
+      "source": "./plugins/maintainer-judgment",
+      "category": "development"
+    },
+    {
+      "name": "skill-tuning",
+      "description": "skill の指示が振る舞いを変えているかを測り、効いていない指示を削る",
+      "source": "./plugins/skill-tuning",
+      "category": "development"
+    },
+    {
+      "name": "tellman-naming",
+      "description": "名前を付けるか、何と呼ぶか、変えるべきかを、Zach Tellman の考え方で判断する",
+      "source": "./plugins/tellman-naming",
+      "category": "development"
+    },
+    {
+      "name": "rust-perf-surgery",
+      "description": "Rust の性能改善を、システムの指標で測り、振る舞いが変わらないことを証明しながら進める",
+      "source": "./plugins/rust-perf-surgery",
+      "category": "development"
     }
   ]
 }

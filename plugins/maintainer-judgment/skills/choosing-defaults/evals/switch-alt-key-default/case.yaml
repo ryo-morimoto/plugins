@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: switch-alt-key-default
+expected_outcome: |
+  The answer does not recommend flipping the default for all users at once
+  The answer identifies that non-US keyboard layouts need Option to type basic characters
+  The answer proposes a default that differs by group (for example by keyboard layout)
+  The answer includes a way to go back (an explicit setting that overrides the default)
+  The answer asks for or cites evidence (complaint counts, what other apps do) for the change

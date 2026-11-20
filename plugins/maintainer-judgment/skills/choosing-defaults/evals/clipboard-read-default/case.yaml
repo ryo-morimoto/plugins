@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: clipboard-read-default
+expected_outcome: |
+  The answer recommends that clipboard reading is off (or ask-first) by default
+  The reason given is safety or danger, not only convenience
+  The answer defines a setting that lets users turn it on
+  The answer names what evidence would justify changing the default later
