@@ -1,8 +1,8 @@
 ---
-name: triaging-feature-requests
+name: triaging-contributions
 description: Drafts a maintainer-style reply to a feature request, proposal or pull request. Use whenever the user asks whether to accept, reject or how to answer a request, even if they only paste an issue.
 ---
-# Triaging feature requests
+# Triaging contributions
 
 A good reply is rarely yes or no. It is "yes, if" or "try over there".
 

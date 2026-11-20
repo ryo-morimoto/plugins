@@ -1,4 +1,4 @@
-# Evidence: removing features
+# Evidence: planning breaking changes
 
 Read this when the user asks "why" or doubts a step.
 

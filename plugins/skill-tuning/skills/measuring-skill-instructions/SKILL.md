@@ -1,8 +1,8 @@
 ---
-name: measuring-and-pruning
+name: measuring-skill-instructions
 description: Measures whether each instruction in a skill changes behaviour, then prunes the ones that do not - instruction inventory, tasks on real artifacts, with/without runs in isolated subagents, 3 trials. Use when asked to evaluate, benchmark, slim down or decide whether to ship a skill, or to "check if this skill actually works".
 ---
-# Measuring and pruning a skill
+# Measuring skill instructions
 
 A skill's instructions have no value in themselves. Value is the problem the skill solves for its user. Every step serves one question: does this text change behaviour in the direction the user wants?
 

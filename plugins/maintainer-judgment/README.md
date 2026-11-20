@@ -6,8 +6,8 @@ Four small skills for product and interface decisions. Each one is a pattern see
 
 | Skill | Use it when | Situation types | Status |
 |---|---|---|---|
-| removing-features | You want to delete, rename or break something | T1 library API, T2 user-facing config | mostly confirmed |
-| triaging-feature-requests | You must answer a request or a pull request | T7 replies to contributions | confirmed |
+| planning-breaking-changes | You want to delete, rename or break something | T1 library API, T2 user-facing config | mostly confirmed |
+| triaging-contributions | You must answer a request or a pull request | T7 replies to contributions | confirmed |
 | choosing-defaults | You pick what happens out of the box | T2 config, T4 desktop app | partly confirmed |
 | native-vs-custom-ui | A standard UI part is not enough | T4 desktop app | single source |
 

@@ -1,4 +1,4 @@
-# Evidence: triaging feature requests
+# Evidence: triaging contributions
 
 Situation type T7: replies to outside contributions in an open source project. Read this when the user asks "why".
 
