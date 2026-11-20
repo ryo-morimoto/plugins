@@ -1,0 +1,1493 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://github.com/ryo-morimoto/plugins/thought-experiments/te/event.v1.json",
+ "title": "te event, version 1",
+ "type": "object",
+ "required": [
+  "kind"
+ ],
+ "properties": {
+  "kind": {
+   "enum": [
+    "frame",
+    "prior_answer",
+    "holder",
+    "prediction",
+    "rival",
+    "probe",
+    "operation",
+    "attack",
+    "conclusion",
+    "review",
+    "correction",
+    "supersede",
+    "decision",
+    "branch",
+    "close"
+   ]
+  }
+ },
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "frame"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/frame"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "prior_answer"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/prior_answer"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "holder"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/holder"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "prediction"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/prediction"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "rival"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/rival"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "probe"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/probe"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "operation"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/operation"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "attack"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/attack"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "conclusion"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/conclusion"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "review"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/review"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "correction"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/correction"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "supersede"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/supersede"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "decision"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/decision"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "branch"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/branch"
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "kind": {
+      "const": "close"
+     }
+    }
+   },
+   "then": {
+    "$ref": "#/$defs/close"
+   }
+  }
+ ],
+ "$defs": {
+  "frame": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "question",
+    "goal",
+    "terms",
+    "mode",
+    "flaw"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "frame"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "question": {
+     "type": "string",
+     "minLength": 1
+    },
+    "goal": {
+     "type": "string",
+     "minLength": 1
+    },
+    "terms": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "term",
+       "reading"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "term": {
+        "type": "string",
+        "minLength": 1
+       },
+       "reading": {
+        "type": "string",
+        "minLength": 1
+       },
+       "source": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+       }
+      }
+     }
+    },
+    "mode": {
+     "anyOf": [
+      {
+       "enum": [
+        "destructive",
+        "constructive",
+        "exploratory",
+        "illustrative"
+       ]
+      },
+      {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "enum": [
+         "destructive",
+         "constructive",
+         "exploratory",
+         "illustrative"
+        ]
+       }
+      }
+     ]
+    },
+    "modes_not_picked": {
+     "type": "array",
+     "items": {
+      "enum": [
+       "destructive",
+       "constructive",
+       "exploratory",
+       "illustrative"
+      ]
+     }
+    },
+    "flaw": {
+     "type": "string",
+     "minLength": 1
+    },
+    "supersedes": {
+     "type": "integer",
+     "minimum": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "prior_answer": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "found"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "prior_answer"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "sources": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+     }
+    },
+    "searched": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "query",
+       "scope"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "query": {
+        "type": "string",
+        "minLength": 1
+       },
+       "scope": {
+        "type": "string",
+        "minLength": 1
+       },
+       "results": {
+        "type": "integer",
+        "minimum": 0
+       }
+      }
+     }
+    },
+    "found": {
+     "type": "boolean"
+    },
+    "summary": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "holder": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "rival"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "holder"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "rival": {
+     "type": "string",
+     "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "sources": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+     }
+    },
+    "strawman": {
+     "type": "boolean"
+    },
+    "strongest_held": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "prediction": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "distribution",
+    "by_whom"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "prediction"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "distribution": {
+     "type": "object",
+     "minProperties": 2,
+     "additionalProperties": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     }
+    },
+    "by_whom": {
+     "type": "string",
+     "minLength": 1
+    },
+    "reference_class": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "rival": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "rid",
+    "text",
+    "would_reject_if"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "rival"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "rid": {
+     "type": "string",
+     "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "text": {
+     "type": "string",
+     "minLength": 1
+    },
+    "is_opposite": {
+     "type": "boolean"
+    },
+    "would_reject_if": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "probe": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "scenario",
+    "varied",
+    "result",
+    "verdicts"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "probe"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "scenario": {
+     "type": "object",
+     "required": [
+      "fixed",
+      "varied"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "fixed": {
+       "type": "string",
+       "minLength": 1
+      },
+      "idealised": {
+       "type": "string",
+       "minLength": 1
+      },
+      "varied": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    "varied": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "result": {
+     "type": "string",
+     "minLength": 1
+    },
+    "verdicts": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "status": {
+        "enum": [
+         "eliminated",
+         "weakened",
+         "unchanged",
+         "supported",
+         "undecidable"
+        ]
+       },
+       "strength": {
+        "enum": [
+         "direct",
+         "indirect"
+        ]
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "sources": {
+     "type": "array",
+     "items": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+       },
+       {
+        "$ref": "#/$defs/citation"
+       }
+      ]
+     }
+    },
+    "outputs": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^outputs/[^/]+$"
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "operation": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "scenario",
+    "varied",
+    "result",
+    "verdicts"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "operation"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "scenario": {
+     "type": "object",
+     "required": [
+      "fixed",
+      "varied"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "fixed": {
+       "type": "string",
+       "minLength": 1
+      },
+      "idealised": {
+       "type": "string",
+       "minLength": 1
+      },
+      "varied": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    "varied": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "result": {
+     "type": "string",
+     "minLength": 1
+    },
+    "verdicts": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "status": {
+        "enum": [
+         "eliminated",
+         "weakened",
+         "unchanged",
+         "supported",
+         "undecidable"
+        ]
+       },
+       "strength": {
+        "enum": [
+         "direct",
+         "indirect"
+        ]
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "sources": {
+     "type": "array",
+     "items": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+       },
+       {
+        "$ref": "#/$defs/citation"
+       }
+      ]
+     }
+    },
+    "outputs": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^outputs/[^/]+$"
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "attack": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "reviewer",
+    "lens",
+    "objections"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "attack"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "reviewer": {
+     "enum": [
+      "fresh",
+      "self"
+     ]
+    },
+    "lens": {
+     "type": "string",
+     "minLength": 1
+    },
+    "brief": {
+     "type": "object",
+     "required": [
+      "file",
+      "sha256"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "file": {
+       "type": "string",
+       "pattern": "^briefs/[^/]+$"
+      },
+      "sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      }
+     }
+    },
+    "response": {
+     "type": "object",
+     "required": [
+      "file",
+      "sha256"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "file": {
+       "type": "string",
+       "pattern": "^briefs/[^/]+$"
+      },
+      "sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      }
+     }
+    },
+    "objections": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "text",
+       "target"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "text": {
+        "type": "string",
+        "minLength": 1
+       },
+       "target": {
+        "enum": [
+         "premise",
+         "inference",
+         "conclusion"
+        ]
+       },
+       "ref": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "premise": {
+        "type": "string",
+        "minLength": 1
+       },
+       "confidence": {
+        "enum": [
+         "low",
+         "medium",
+         "high"
+        ]
+       },
+       "response": {
+        "enum": [
+         "surrender",
+         "bar",
+         "restrict",
+         "reinterpret",
+         "incorporate"
+        ]
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "counter_experiment": {
+     "type": "string",
+     "minLength": 1
+    },
+    "verdicts": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "status": {
+        "enum": [
+         "eliminated",
+         "weakened",
+         "unchanged",
+         "supported",
+         "undecidable"
+        ]
+       },
+       "strength": {
+        "enum": [
+         "direct",
+         "indirect"
+        ]
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "conclusion": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "answer",
+    "answer_rival",
+    "premises"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "conclusion"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "answer": {
+     "type": "string",
+     "minLength": 1
+    },
+    "answer_rival": {
+     "anyOf": [
+      {
+       "type": "string",
+       "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "claim": {
+     "type": "string",
+     "minLength": 1
+    },
+    "premises": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "pid",
+       "text",
+       "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "pid": {
+        "type": "string",
+        "minLength": 1
+       },
+       "text": {
+        "type": "string",
+        "minLength": 1
+       },
+       "label": {
+        "enum": [
+         "definitional",
+         "argued",
+         "empirical-checked",
+         "empirical-unverified",
+         "value"
+        ]
+       },
+       "if_false": {
+        "type": "string",
+        "minLength": 1
+       },
+       "citations": {
+        "type": "array",
+        "items": {
+         "$ref": "#/$defs/citation"
+        }
+       },
+       "outputs": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^outputs/[^/]+$"
+        }
+       }
+      }
+     }
+    },
+    "options": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "oid",
+       "text",
+       "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "oid": {
+        "type": "string",
+        "minLength": 1
+       },
+       "text": {
+        "type": "string",
+        "minLength": 1
+       },
+       "status": {
+        "enum": [
+         "surviving",
+         "eliminated"
+        ]
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       },
+       "downsides": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "minLength": 1
+        }
+       }
+      }
+     }
+    },
+    "accepted_downsides": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "milestones": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "review": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "by_whom",
+    "text"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "review"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "by_whom": {
+     "type": "string",
+     "minLength": 1
+    },
+    "value": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "novelty": {
+       "type": "string",
+       "minLength": 1
+      },
+      "importance": {
+       "type": "string",
+       "minLength": 1
+      },
+      "surprise": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    "text": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "correction": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "target",
+    "what",
+    "why"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "correction"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "target": {
+     "type": "object",
+     "additionalProperties": false,
+     "minProperties": 1,
+     "maxProperties": 1,
+     "properties": {
+      "event": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "source": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+      }
+     }
+    },
+    "what": {
+     "type": "string",
+     "minLength": 1
+    },
+    "why": {
+     "type": "string",
+     "minLength": 1
+    },
+    "replace": {
+     "type": "object"
+    }
+   },
+   "additionalProperties": false
+  },
+  "supersede": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "target",
+    "why"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "supersede"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "target": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "why": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "decision": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "what"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "decision"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "what": {
+     "type": "string",
+     "minLength": 1
+    },
+    "options_considered": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "accepts": {
+     "type": "integer",
+     "minimum": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "branch": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "why"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "branch"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "to": {
+     "type": "string",
+     "minLength": 1
+    },
+    "from": {
+     "type": "string",
+     "minLength": 1
+    },
+    "why": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "close": {
+   "type": "object",
+   "required": [
+    "id",
+    "v",
+    "at",
+    "kind",
+    "author",
+    "state"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "v": {
+     "const": 1
+    },
+    "at": {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "kind": {
+     "const": "close"
+    },
+    "author": {
+     "type": "string",
+     "pattern": "^(claude|user|reviewer:[A-Za-z0-9_-]+)$"
+    },
+    "note": {
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "concluded",
+      "abandoned",
+      "branched"
+     ]
+    },
+    "why": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "citation": {
+   "type": "object",
+   "required": [
+    "source",
+    "level"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "source": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "level": {
+     "enum": [
+      "primary",
+      "secondary"
+     ]
+    },
+    "primary_of": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "locator": {
+     "type": "string",
+     "minLength": 1
+    },
+    "role": {
+     "enum": [
+      "citesAsEvidence",
+      "usesDataFrom",
+      "usesMethodIn",
+      "supports",
+      "disputes",
+      "qualifies"
+     ]
+    }
+   }
+  }
+ }
+}
