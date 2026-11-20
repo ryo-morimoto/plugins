@@ -288,7 +288,6 @@ __DRAFTS__
   let editing = null;
   let hovered = null;
   let hideTimer = null;
-  let switchTimer = null;
 
   const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(comments)); } catch (e) { /* 保存できなくても、画面の動きは変えない */ } };
@@ -393,7 +392,6 @@ __DRAFTS__
   }
   function closeEditor() { editing = null; $('editor').hidden = true; clearFocus(); }
 
-  const SWITCH_DELAY = 75;
   const HOLD_PAD = 2;
   const BRIDGE = 12;
   let mouse = { x: -1, y: -1 };
@@ -401,7 +399,7 @@ __DRAFTS__
   const inside = (r, x, y) => !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
 
   function clearFocus() {
-    clearTimeout(hideTimer); clearTimeout(switchTimer);
+    clearTimeout(hideTimer);
     if (hovered) hovered.classList.remove('focus');
     hovered = null; hold = null;
     $('hoverbtn').hidden = true;
@@ -426,18 +424,11 @@ __DRAFTS__
   document.addEventListener('mouseover', (e) => {
     mouse = { x: e.clientX, y: e.clientY };
     if (!$('editor').hidden) return;
-    if (inside(hold, e.clientX, e.clientY)) { clearTimeout(hideTimer); clearTimeout(switchTimer); return; }
+    if (inside(hold, e.clientX, e.clientY)) { clearTimeout(hideTimer); return; }
     const el = e.target.closest && e.target.closest('.s');
     if (!el) return;
-    clearTimeout(hideTimer); clearTimeout(switchTimer);
-    if (!hovered) { focusOn(el); return; }
-    if (el === hovered) return;
-    switchTimer = setTimeout(() => {
-      if (!$('editor').hidden || inside(hold, mouse.x, mouse.y)) return;
-      const at = document.elementFromPoint(mouse.x, mouse.y);
-      const now = at && at.closest && at.closest('.s');
-      if (now) focusOn(now);
-    }, SWITCH_DELAY);
+    clearTimeout(hideTimer);
+    focusOn(el);
   });
   document.addEventListener('mouseout', () => {
     if (!$('editor').hidden) return;
