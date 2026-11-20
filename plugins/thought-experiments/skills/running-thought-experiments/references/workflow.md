@@ -1,6 +1,6 @@
 # Workflow
 
-One stage per reply: a whole run in one message is too long and leaves the user nothing to steer. Asked for everything at once? Compress, keep the budget.
+One stage per reply: a whole run in one message is too long and leaves the user nothing to steer. Asked for all at once? Compress.
 
 **Budget per reply:** about 350 words, or 1,500 characters in Japanese. Cut detail before options; offer depth.
 
@@ -18,7 +18,7 @@ One stage per reply: a whole run in one message is too long and leaves the user 
 3. Say which rivals each result eliminates. A result every rival predicts teaches nothing.
 
 ## Stage C: attack and conclude
-1. Attack your own result, including one counter thought experiment.
+1. Get the attack from fresh subagents, not yourself, with one counter thought experiment.
 2. Give the conclusion as premises, each labelled definitional, argued, or empirical and unverified.
 3. Show surviving options side by side; keep eliminated ones with reasons. The user chooses.
 
