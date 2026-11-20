@@ -50,7 +50,7 @@ title: "..."
       postings/<id>.md
 ```
 
-`<store>` は、利用者が決める置き場所の根です。ファイルの中身と、この配置の相対パスだけが約束で、絶対パスは書きません。
+`<store>` は、利用者が決める置き場所の根です。推奨は、XDG の仕様に従った `${XDG_DATA_HOME:-$HOME/.local/share}/pr-review` です。公開リポジトリには、入れません。ファイルの中身と、この配置の相対パスだけが約束で、絶対パスは書きません。
 
 ## 種類ごとの項目
 
@@ -182,3 +182,87 @@ title: "..."
 10. `location` の `start_line` が `end_line` 以下で、1 以上。
 11. revision の `references` のうち `kind: "repo"` の URL が、40 桁の SHA に固定された blob の固定リンクである。
 12. `posting.outcome` が `pending` 以外なら `outcome_judged_by` が埋まっている。
+
+## 記入例
+
+検査を通った例です（架空のデータ）。
+
+- `type` の値: `pull`、`snapshot`、`finding`、`assessment`、`draft`、`revision`、`posting`。
+- id: `echo "$(date -u +%Y%m%dT%H%M%SZ)-$(openssl rand -hex 3)"`。
+- 時刻: `date -u +%Y-%m-%dT%H:%M:%SZ`。
+- ハッシュ: `printf '%s' "<本文>" | shasum -a 256`。`payload_hash` は、投稿した本文（rev の本文の、前後の `\n` を除いたもの）に、`body_hash` と同じ規則で出す。検査は、中身の一致までは見ない。
+- 承認: 版は、`approved_by` と `approved_at` を `null` で作り、承認されたら、2 つを同時に書き込む。
+- 却下: 気づきの `dismissed_reason` に、人の言葉の原文を 1 回だけ書く。
+
+### assessment
+
+```
+---
+type: "assessment"
+schema: 1
+id: "20261120T074333Z-02600c"
+finding_id: "20261120T074322Z-3b9aad"
+profile_id: null
+action: "share"
+blocking: false
+importance: "low"
+intent_quote: "上限を定数にした理由を知っておきたい"
+premise_quote: null
+rationale_ref: null
+assessed_by: "example-reviewer"
+assessed_at: "2026-11-20T07:43:33Z"
+---
+```
+
+### draft
+
+```
+---
+type: "draft"
+schema: 1
+id: "20261120T074352Z-4371b4"
+assessment_id: "20261120T074333Z-fd30af"
+withdrawn_at: null
+---
+```
+
+### revision（承認済み）
+
+```
+---
+type: "revision"
+schema: 1
+draft_id: "20261120T074352Z-4371b4"
+rev: 2
+references: [{"kind": "repo", "url": "https://github.com/example-org/example-repo/blob/ec9b11f4752eadca7e100d863315c9f689286458/src/cart/total.ts#L5-L6"}]
+changed_by: "agent:rehearsal"
+changed_at: "2026-11-20T07:44:12Z"
+reason_quote: "該当の行番号も書き添えてほしい"
+approved_by: "example-reviewer"
+approved_at: "2026-11-20T07:44:12Z"
+---
+【相談】税額を含めた合計の端数処理について
+（以下、下書きの本文。`rules.md` の 3 部形式）
+```
+
+### posting
+
+```
+---
+type: "posting"
+schema: 1
+id: "20261120T074417Z-a34176"
+draft_id: "20261120T074352Z-4371b4"
+rev: 2
+mode: "new"
+github_comment_id: "123456789"
+url: "https://github.com/example-org/example-repo/pull/12#discussion_r123456789"
+payload_hash: "427cbd37f96dff09b275e1d71f16160c224950fd0eae91ee664cd412e81183ad"
+anchor_verified: true
+head_sha_at_post: "ec9b11f4752eadca7e100d863315c9f689286458"
+posted_at: "2026-11-20T07:44:17Z"
+outcome: "pending"
+reply_refs: []
+outcome_judged_by: null
+---
+```

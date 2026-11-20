@@ -21,6 +21,8 @@ description: PR のレビューコメントの下書きを作る。レビュー�
 
 `references/intake.md` に従います。pr-tour の JSON なら、`<skill>/scripts/import-findings.py` で取り込みます（先に `--dry-run`）。
 
+記録の置き場所（`--store`）は、XDG の仕様に従い、`${XDG_DATA_HOME:-$HOME/.local/share}/pr-review` を使います。
+
 ### 2. 事実を集める
 
 気づきの根拠になる事実を集めます。コードへの固定リンク（`blob/<40 桁の SHA>/…`）を引用するときは、`scripts/resolve-permalinks.py` で確かめます。
@@ -44,6 +46,7 @@ python3 <skill>/scripts/resolve-permalinks.py --repo <リポジトリのパス> 
 
 - `intent_quote`（何を実現したいか）と `premise_quote`（そう考える前提）は、**人の言葉の原文**を、言い換えずに書きます。
 - 人が言葉にしていなければ、書かずに、聞きます。
+- 却下するときは、気づきの `dismissed_reason` に、人の言葉の原文を 1 回だけ書きます（`references/records.md` の記入例）。
 
 ### 4. 下書きを作る
 
@@ -52,18 +55,18 @@ python3 <skill>/scripts/resolve-permalinks.py --repo <リポジトリのパス> 
 ### 5. 確認する
 
 1. `resolve-permalinks.py` を、下書きに通します。結果を見ます。
-2. `evaluator`（独立した確認役）を呼びます。渡すのは、**下書きのパス、`rules.md` のパス、`resolve-permalinks.py` のパス、リポジトリのパス**（すべて絶対パス）だけです。自分の結論や、直したい点は渡しません。
+2. `evaluator`（独立した確認役）を呼びます。渡すのは、**下書きのパス、`rules.md` のパス、`resolve-permalinks.py` のパス、リポジトリのパス**（すべて絶対パス）だけです。自分の結論や、直したい点は渡しません。呼べないときは、`evaluator.md` の手順に従って自分で評価し、独立した確認ではないと、人に伝えます。
 3. 確認役の指摘は、**根拠になっているか、関連しているかを、自分で確かめてから**取り込みます。
 4. 取り込むときは、新しい版（rev-002 以降）にします。`reason_quote` に、人の言葉を書きます。
 
 ### 6. 承認を求める
 
-下書きを人に見せ、承認を求めます。人が承認したら、その版の `approved_by` と `approved_at` を埋めます。**承認されていない版は、投稿に進みません。**
+下書きを人に見せ、承認を求めます。人が承認したら、その版の `approved_by` と `approved_at` を埋めます。**承認されていない版は、投稿に進みません。** 版は、承認の 2 つの欄を `null` で作り、承認されたら、2 つを同時に書き込みます。
 
 ### 7. 記録を検査する
 
 ```
-python3 <skill>/scripts/validate-records.py --store <記録の置き場>
+python3 <skill>/scripts/validate-records.py --store "${XDG_DATA_HOME:-$HOME/.local/share}/pr-review"
 ```
 
 書式に合わない点があれば、直します。

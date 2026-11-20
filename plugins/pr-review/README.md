@@ -1,3 +1,13 @@
+2026-11-20 に、次のコマンドで、インストールを確認しました。新しいセッションから、skill と agent が見えること、skill が読み込めることまで確認しています。
+
+```
+claude plugin marketplace add ryo-morimoto/plugins
+claude plugin install pr-review@ryo-morimoto-plugins --scope user
+```
+
+- `ryo-morimoto/plugins` の形は、内部で SSH（`git@github.com:…`）で clone されました。SSH の鍵が無い環境では、失敗する可能性があります。HTTPS の URL での追加は、試していません。
+- skill の自動起動（質問から、自動で選ばれるか）と、`evaluator` の実際の呼び出しは、未確認です。
+
 # pr-review
 
 > **検証中（experimental）です。** より良いスコープに組み替える可能性が高く、名前・構成・記録の書式は、予告なく変わります。
@@ -101,6 +111,6 @@ python3 -m unittest discover -s plugins/pr-review/tests -v
 14. pr-tour の実物の JSON 書き出しでの検証が未実施（合成データだけ）。
 15. 3 部形式の適用範囲が、「中くらい以上」に限られる読み替えになっており、低めの指摘の書き方が未定義。この読み替えは、作者の解釈。 着手の条件: 低めの指摘を、実際に下書きするとき。
 16. `evaluator` の「読み取り専用」は文章上の指示で、`tools` に Bash が含まれるため、書き込みを機械的には防いでいない。論文や記事を取得する手段もなく、外部の根拠は `unverifiable` になる。 着手の条件: 2 つ目のツールで、実際に使うとき。
-17. plugin のインストール（`/plugin marketplace add` と `install`）、skill の自動起動、`evaluator` の呼び出しは、実際には試していない。Python は、3.9.6、3.14.10、3.15.2 でテストが通ることを確認した（それ以外は未確認）。
+17. skill の自動起動と、`evaluator` の呼び出しは、実際には試していない（インストールと skill の読み込みは、確認した）。Python は、3.9.6、3.14.10、3.15.2 でテストが通ることを確認した（それ以外は未確認）。
 
 ライセンス: MIT（リポジトリの根の `LICENSE`）
