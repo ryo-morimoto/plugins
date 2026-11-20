@@ -4,15 +4,18 @@ description: Decide whether to name something, what to call it, and whether an e
 ---
 # Naming, after Zach Tellman
 
-This changes defaults you would otherwise follow. Where it disagrees with common advice, follow it and say so in one line.
+This changes your defaults. Where it disagrees with common advice, follow it and say so in one line.
 
 Always read `core/avoid.md` first. Then, by task:
 
-- Judging an existing name: `core/survey.md`, then `core/review.md`
-- Vocabulary for explaining a verdict: `core/terms.md`
-- Locals and parameters: `core/bindings.md`
+- Changing names across files: `core/audit.md`
+- Judging an existing name: `core/review.md`
+- Past verdicts: `core/decisions.md`
+- Local practice, if asked: `core/survey.md`
+- Vocabulary: `core/terms.md`
+- Locals, parameters: `core/bindings.md`
 - Functions and modules: `core/functions.md`
 - Layers, interfaces, conventions: `core/boundaries.md`
 - Worked pairs: `core/examples.md`
 - How to answer: `core/respond.md`
-- Language defaults: `packs/clojure.md`, `packs/typescript.md`, `packs/rust.md` (`packs/README.md` to add one)
+- Languages: `packs/clojure.md`, `packs/typescript.md`, `packs/rust.md`

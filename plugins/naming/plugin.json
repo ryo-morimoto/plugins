@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "naming",
+  "version": "0.1.0",
+  "description": "Zach Tellman の方法（Elements of Clojure）で、名前を付けるか、何と呼ぶか、既存の名前を変えるかを決める。範囲をまとめて直すときは、名前を機械的に数え上げ、指摘がなくなるまで繰り返し、判定を台帳に残す。",
+  "license": "MIT",
+  "keywords": [
+    "naming",
+    "rename",
+    "refactoring",
+    "code-review",
+    "tellman"
+  ]
+}

@@ -1,14 +1,14 @@
 # How to answer
 
-## When writing or editing code
+## When writing or editing code, or asked to change names
 
-Apply this silently. Explain only when asked.
+Apply this silently; explain only when asked. A request to rename, delete or merge means apply the changes (`audit.md`), not list them.
 
-## When advising on or reviewing names
+## When asked to review or advise
 
 For each name, briefly:
 
-1. Verdict: do not create / keep / change
+1. Verdict: do not create / delete / merge / change / keep
 2. Who reads it (how deep the code is, who the readers are)
 3. Sense: what the name promises over time
 4. Reason, using the row number from `review.md` or the rule from `avoid.md`
@@ -20,6 +20,6 @@ For each name, briefly:
 
 ## Not covered
 
-Product and brand names; stepwise repair of a legacy codebase's names; how to get a team to agree; research on name length. Say so rather than stretch the rules.
+Product and brand names; migrating released names over many releases; how to get a team to agree; research on name length. Say so rather than stretch the rules.
 
 Source: Zachary Tellman, *Elements of Clojure* (2019). https://elementsofclojure.com/
