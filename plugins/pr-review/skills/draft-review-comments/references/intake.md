@@ -11,15 +11,18 @@
 推奨の経路です。pr-tour が書き出した JSON（`schemaVersion` が 1、`kind` が `pr-tour-review`）を、スクリプトで取り込みます。
 
 ```
-python3 <skill>/scripts/import-findings.py --store "${XDG_DATA_HOME:-$HOME/.local/share}/pr-review" --from <書き出した JSON> [--series <まとまりの名前>] [--created-by <名前>] [--dry-run]
+python3 <skill>/scripts/import-findings.py --store "${XDG_DATA_HOME:-$HOME/.local/share}/pr-review" --repo <対象のリポジトリ> --from <書き出した JSON> [--series <まとまりの名前>] [--created-by <名前>] [--dry-run]
 ```
 
 `<skill>` は、`SKILL.md` があるディレクトリです（`SKILL.md` を参照）。
 
-- 先に `--dry-run` で、作られる予定を確かめます。`--dry-run` が示す id は、実際の取り込みで変わります。
+- 各コメントには、`commit`（40 桁の 16 進）と `code`（選んだ行の原文）が要ります。無いものは、取り込みません。
+- 取り込む前に、各コメントの `startLine`〜`endLine` を、`--repo` のリポジトリの `commit` 時点の `path` と照合し、`code` と一致するかを確かめます。**一致しないコメントが 1 件でもあれば、全件を報告して何も書かず、終了コード 2 で止まります**（行の位置が、静かにずれたまま記録されるのを防ぐため）。改行の CRLF と、末尾の改行の違いは、同じとみなします。
+- `commit` が手元のリポジトリに無いと、読めずに止まります。先に `git fetch` してください。
+- 先に `--dry-run` で、作られる予定を確かめます。照合は、`--dry-run` でも行います（読み取りだけです）。`--dry-run` が示す id は、実際の取り込みで変わります。
 - 同じ PR で、`origin_ref`（元のコメントの id）が同じ気づきが既にあれば、作らずに「スキップ」と報告されます。本文が違うときは「衝突」と報告され、上書きはされません。
 - 既存のファイルと混ぜない別のディレクトリを `--store` に指定することを勧めます（配置の関係が未決のため。README の「現状と制限」を参照）。
-- 実物の pr-tour の書き出しでは、まだ試していません。合成データだけで確かめています。
+- 実物の pr-tour の書き出しでは、まだ試していません。合成データだけで確かめています。実物の `code` の形（インデントの扱い、改行など）が、ここでの想定と違うと、照合で止まります。止まったら、実物の形に合わせて照合を直します。
 
 ## (b) pr-tour の「Copy for AI」の Markdown
 
