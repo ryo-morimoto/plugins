@@ -393,12 +393,12 @@ __DRAFTS__
   }
   function closeEditor() { editing = null; $('editor').hidden = true; clearFocus(); }
 
-  const SWITCH_DELAY = 200;
-  const NEAR = 80;
+  const SWITCH_DELAY = 75;
+  const HOLD_PAD = 2;
+  const BRIDGE = 12;
   let mouse = { x: -1, y: -1 };
   let hold = null;
   const inside = (r, x, y) => !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-  const near = (r, x, y) => !!r && Math.max(r.left - x, 0, x - r.right) <= NEAR && Math.max(r.top - y, 0, y - r.bottom) <= NEAR;
 
   function clearFocus() {
     clearTimeout(hideTimer); clearTimeout(switchTimer);
@@ -411,16 +411,14 @@ __DRAFTS__
     if (hovered === el) return;
     if (hovered) hovered.classList.remove('focus');
     hovered = el; el.classList.add('focus');
-    const rects = el.getClientRects();
-    const last = rects[rects.length - 1];
+    const first = el.getClientRects()[0];
     const b = $('hoverbtn'); b.hidden = false;
-    place(b, last.right - b.offsetWidth / 2, last.top - b.offsetHeight - 2);
+    place(b, first.left - b.offsetWidth - 8, first.top + (first.height - b.offsetHeight) / 2);
     const br = b.getBoundingClientRect();
-    const pad = 6;
-    const tail = Math.max(last.left, last.right - 40);
+    const bridge = Math.min(first.right, first.left + BRIDGE);
     hold = {
-      left: Math.min(tail, br.left) - pad, right: Math.max(last.right, br.right) + pad,
-      top: Math.min(last.top, br.top) - pad, bottom: Math.max(last.bottom, br.bottom) + pad,
+      left: Math.min(br.left, first.left) - HOLD_PAD, right: Math.max(br.right, bridge) + HOLD_PAD,
+      top: Math.min(br.top, first.top) - HOLD_PAD, bottom: Math.max(br.bottom, first.bottom) + HOLD_PAD,
     };
   }
 
@@ -434,7 +432,6 @@ __DRAFTS__
     clearTimeout(hideTimer); clearTimeout(switchTimer);
     if (!hovered) { focusOn(el); return; }
     if (el === hovered) return;
-    if (!near(hold, e.clientX, e.clientY)) { focusOn(el); return; }
     switchTimer = setTimeout(() => {
       if (!$('editor').hidden || inside(hold, mouse.x, mouse.y)) return;
       const at = document.elementFromPoint(mouse.x, mouse.y);
