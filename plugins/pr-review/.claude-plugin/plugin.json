@@ -1,0 +1,15 @@
+{
+  "name": "pr-review",
+  "version": "0.1.0",
+  "description": "PR のレビューで、気づきの整理、優先づけの案、コメントの下書き、独立した確認までを助ける。投稿は承認後に人が行う。",
+  "author": {
+    "name": "Ryo Morimoto"
+  },
+  "keywords": [
+    "pull-request",
+    "code-review",
+    "review-comments",
+    "draft"
+  ],
+  "license": "MIT"
+}

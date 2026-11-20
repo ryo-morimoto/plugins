@@ -1,0 +1,15 @@
+{
+  "name": "ryo-morimoto-plugins",
+  "description": "Experimental agent plugins (Agent Plugins layout where possible; verified on Claude Code only; work in progress)",
+  "owner": {
+    "name": "ryo-morimoto"
+  },
+  "plugins": [
+    {
+      "name": "pr-review",
+      "description": "PR のレビューで、気づきの整理、優先づけの案、コメントの下書き、独立した確認までを助ける",
+      "source": "./plugins/pr-review",
+      "category": "development"
+    }
+  ]
+}

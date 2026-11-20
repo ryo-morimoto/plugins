@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "pr-tour-review",
+  "prUrl": "https://github.com/example-org/example-repo/pull/12",
+  "repositoryUrl": "https://github.com/example-org/example-repo",
+  "head": "1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "base": "2222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "mergeBase": "3333333ccccccccccccccccccccccccccccccccc",
+  "comments": [
+    {
+      "id": "c-001",
+      "path": "src/cart/total.ts",
+      "side": "right",
+      "commit": "1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "startLine": 10,
+      "endLine": 12,
+      "code": "const subtotal = items.reduce((sum, item) => sum + item.price, 0);\nconst tax = subtotal * TAX_RATE;\nreturn subtotal + tax;",
+      "body": "税額の端数処理がここだけ丸めずに返っています。",
+      "createdAt": "2026-11-18T01:23:45.000Z",
+      "updatedAt": "2026-11-18T01:23:45.000Z"
+    },
+    {
+      "id": "c-002",
+      "path": "src/cart/discount.ts",
+      "side": "right",
+      "commit": "1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "startLine": 4,
+      "endLine": 4,
+      "code": "export const MAX_DISCOUNT = 0.5;",
+      "body": "\n割引率の上限を定数にした意図を知りたいです。\n\n- 将来、ユーザーごとに変える予定か\n- 変えるなら、設定として外に出す案もある\n",
+      "createdAt": "2026-11-18T01:30:10.000Z",
+      "updatedAt": "2026-11-18T02:00:00.000Z"
+    },
+    {
+      "id": "c-003",
+      "path": "src/cart/legacy-total.ts",
+      "side": "left",
+      "commit": "3333333ccccccccccccccccccccccccccccccccc",
+      "startLine": 21,
+      "endLine": 23,
+      "code": "function legacyTotal(items) {\n  return items.length;\n}",
+      "body": "この関数を消すと、旧画面の合計表示が壊れませんか。",
+      "createdAt": "2026-11-18T01:41:00.000Z",
+      "updatedAt": "2026-11-18T01:41:00.000Z"
+    }
+  ]
+}
