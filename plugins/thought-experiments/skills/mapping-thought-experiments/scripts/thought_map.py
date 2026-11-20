@@ -283,7 +283,7 @@ TEMPLATE = r"""<!doctype html>
 :root {
   --bg: #f7f6f2; --paper: #ffffff; --ink: #1d1d1b; --sub: #6b6a64; --line: #dcd9d0; --out_of_scope: #dcd9d0;
   --supported: #2f7d6d; --supported-bg: #dcefe9; --refuted: #7a5c58; --refuted-bg: #ece3e1;
-  --hypothesis: #b07a12; --hypothesis-bg: #f8ecd2; --open: #b07a12; --contested: #c0392b; --contested-bg: #f7dcd8;
+  --on-accent: #ffffff; --supported-ink: #24614f; --contested-ink: #a8301f; --hypothesis: #b07a12; --hypothesis-ink: #8a5f0e; --hypothesis-bg: #f8ecd2; --open: #b07a12; --contested: #c0392b; --contested-bg: #f7dcd8;
   --unexplored: #b9b5aa; --focus: #3b5bdb; --focus-bg: #e5eafd; --premise: #7048e8;
   --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -291,104 +291,107 @@ TEMPLATE = r"""<!doctype html>
   :root {
     --bg: #161614; --paper: #1f1f1c; --ink: #ecebe6; --sub: #a3a198; --line: #3a3934; --out_of_scope: #3a3934;
     --supported: #6cc3ad; --supported-bg: #1f3a33; --refuted: #c9a8a2; --refuted-bg: #3a2d2b;
-    --hypothesis: #e2b453; --hypothesis-bg: #3d3220; --open: #e2b453; --contested: #ff8a7a; --contested-bg: #4a2522;
+    --on-accent: #161614; --supported-ink: #6cc3ad; --contested-ink: #ff8a7a; --hypothesis: #e2b453; --hypothesis-ink: #e2b453; --hypothesis-bg: #3d3220; --open: #e2b453; --contested: #ff8a7a; --contested-bg: #4a2522;
     --unexplored: #5d5b54; --focus: #8ea2ff; --focus-bg: #262d4d; --premise: #b197fc;
   }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
-  font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  overflow-wrap: anywhere; }
 a { color: var(--focus); }
 header { padding: 28px 32px 8px; max-width: 1400px; margin: 0 auto; }
-.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--sub); }
+.eyebrow { font-size: 12px; letter-spacing: 1px; color: var(--sub); }
 h1 { font-size: 24px; margin: 4px 0 6px; }
 .question { font-size: 17px; margin: 0 0 16px; }
-.question::before { content: "問い "; color: var(--sub); font-size: 13px; }
-.progress { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.bar { display: flex; height: 10px; width: min(420px, 100%); border-radius: 5px; overflow: hidden; background: var(--line); }
-.bar span { display: block; height: 100%; }
+.question .label { color: var(--sub); font-size: 13px; }
+.progress { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.bar { display: grid; max-width: 420px; border-radius: 5px; overflow: hidden; background: var(--line); }
+.bar i { display: block; border-top-width: 10px; border-top-style: solid; }
 .progress .count { font-size: 14px; }
 .progress .count b { font-size: 20px; }
-.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--sub); }
-.legend i { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; border-radius: 3px; }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 4px 12px; font-size: 12px; color: var(--sub); }
+.legend > span { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 4px; align-items: center; }
+.legend i { display: block; width: 14px; border-top-width: 14px; border-top-style: solid; border-top-color: transparent; border-radius: 3px; }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; padding: 16px 32px 40px; max-width: 1400px; margin: 0 auto; }
-@media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { header { padding: 20px 16px 8px; } main { padding: 12px 16px 32px; gap: 16px; } section.panel { padding: 14px; } }
 section.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
-h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; letter-spacing: .04em; }
+h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; letter-spacing: 0.5px; }
 
 /* 軸 */
-.axis-card { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; font-size: 13px; }
-.axis-card .side { color: var(--sub); width: 2em; }
+.axis-card { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 10px; margin-bottom: 8px; font-size: 13px; }
+.axis-card .side { color: var(--sub); }
+.axis-card .body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .axis-card .name { font-weight: 600; }
-.chip { font-size: 11px; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.axis-card .chips { display: grid; grid-template-columns: repeat(auto-fill, 104px); gap: 6px; }
+.chip { font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; text-align: center; }
 .chip.standard, .chip.paper { color: var(--supported); }
-.chip.own { color: var(--hypothesis); border-style: dashed; }
-.chip.unread { color: var(--sub); border-style: dotted; }
-.axis-card.flag { cursor: pointer; }
+.chip.own { color: var(--hypothesis-ink); border-color: transparent; outline: 1px dashed var(--hypothesis); outline-offset: -1px; }
+.chip.unread { color: var(--sub); border-color: transparent; outline: 1px dotted var(--sub); outline-offset: -1px; }
 .axis-card.selected { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
 
 /* 地図 */
-.grid { display: grid; gap: 6px; margin-top: 14px; }
-.colhead, .rowhead { font-size: 13px; font-weight: 600; padding: 6px 8px; display: flex; flex-direction: column; justify-content: center; }
-.colhead { text-align: center; align-items: center; border-bottom: 2px solid var(--line); }
-.rowhead { border-right: 2px solid var(--line); }
-.rowhead.head-own { border-right-style: dashed; border-right-color: var(--hypothesis); }
-.colhead.head-own { border-bottom-style: dashed; border-bottom-color: var(--hypothesis); }
-.tally { font-size: 11px; color: var(--sub); font-weight: 400; }
-.corner { font-size: 11px; color: var(--sub); display: flex; align-items: flex-end; padding: 6px; }
+.grid { display: grid; gap: 6px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
+.grid:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.colhead, .rowhead { font-size: 13px; font-weight: 600; padding: 6px 8px; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 2px; }
+.colhead { text-align: center; border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: var(--line); }
+.rowhead { border-right-width: 2px; border-right-style: solid; border-right-color: var(--line); }
+.rowhead.head-own { border-right-color: var(--hypothesis); }
+.colhead.head-own { border-bottom-color: var(--hypothesis); }
+.tally { font-size: 12px; color: var(--sub); font-weight: 400; }
+.corner { font-size: 12px; color: var(--sub); align-self: end; padding: 6px; }
 
-.cell { position: relative; min-height: 96px; border-radius: 8px; padding: 9px 10px 8px; cursor: pointer;
-  border: 1.5px solid transparent; transition: opacity .15s, transform .15s; font-size: 12.5px; overflow: hidden; }
+.cell { border-radius: 8px; padding: 9px 10px 10px; cursor: pointer;
+  border: 1.5px solid transparent; transition: transform .15s; font-size: 12.5px; }
 .cell:hover { transform: translateY(-1px); }
-.cell .glyph { font-size: 18px; font-weight: 700; line-height: 1; }
-.cell .text { margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cell.cell:focus-visible, .cand:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.cell .head { display: grid; grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 4px; align-items: center; }
+.cell .glyph { font-size: 18px; font-weight: 700; line-height: 24px; }
+.cell .slot { display: grid; grid-template-columns: 40px minmax(0, 1fr); }
+.cell .text { margin-top: 6px; }
 .cell.supported { background: var(--supported-bg); border-color: var(--supported); color: var(--ink); }
-.cell.supported .glyph { color: var(--supported); }
+.cell.supported .glyph { color: var(--supported-ink); }
 .cell.refuted { background: var(--refuted-bg); border-color: var(--refuted); }
 .cell.refuted .glyph { color: var(--refuted); }
-.cell.hypothesis { border-color: var(--hypothesis);
-  background: repeating-linear-gradient(135deg, var(--hypothesis-bg) 0 8px, var(--paper) 8px 14px); }
-.cell.hypothesis .glyph { color: var(--hypothesis); }
-.cell.contested { border-color: var(--contested);
-  background: repeating-linear-gradient(45deg, var(--contested-bg) 0 6px, var(--paper) 6px 12px); }
-.cell.contested .glyph { color: var(--contested); }
-.cell.open { border: 2px dashed var(--open); background: var(--paper); }
-.cell.open .glyph { color: var(--open); }
-.cell.unexplored { border: 1.5px dashed var(--unexplored); background: transparent; color: var(--sub); }
-.cell.unexplored .glyph { color: var(--unexplored); }
-.cell.out_of_scope { background: var(--out_of_scope); color: var(--sub); }
+.cell.hypothesis { border-color: var(--hypothesis); background: var(--hypothesis-bg); }
+.cell.hypothesis .glyph { color: var(--hypothesis-ink); }
+.cell.contested { border-color: var(--contested); background: var(--contested-bg); }
+.cell.contested .glyph { color: var(--contested-ink); }
+.cell.open { outline: 2px dashed var(--open); outline-offset: -2px; background: var(--paper); }
+.cell.open .glyph { color: var(--hypothesis-ink); }
+.cell.unexplored { outline: 1.5px dashed var(--unexplored); outline-offset: -1.5px; background: transparent; color: var(--sub); }
+.cell.unexplored .glyph { color: var(--sub); }
+.cell.out_of_scope { background: var(--out_of_scope); color: var(--ink); }
 
-.rank { position: absolute; top: 7px; right: 8px; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--focus); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
-.grid.focusing .cell { opacity: .35; }
-.grid.focusing .cell.chosen, .grid.focusing .cell.premise { opacity: 1; }
+.rank { line-height: 24px; text-align: center; border-radius: 50%;
+  background: var(--focus); color: var(--on-accent); font-size: 12px; font-weight: 700; }
 .cell.chosen { box-shadow: 0 0 0 3px var(--focus); }
 .cell.premise { box-shadow: 0 0 0 3px var(--premise); }
-.cell.premise::after { content: "前提"; position: absolute; top: 8px; left: 32px; font-size: 10px;
-  color: #fff; background: var(--premise); padding: 0 6px; border-radius: 4px; }
+.badge-premise { text-align: center; font-size: 12px; color: var(--on-accent); background: var(--premise); padding: 0 6px; border-radius: 4px; }
 
 /* 次に考える候補 */
-.cands { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.cands { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .cand { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: grid;
-  grid-template-columns: 26px 1fr; gap: 2px 8px; }
+  grid-template-columns: 24px minmax(0, 1fr); gap: 2px 8px; }
 .cand:hover { border-color: var(--focus); }
 .cand.selected { border-color: var(--focus); background: var(--focus-bg); }
-.cand .n { grid-row: span 2; width: 22px; height: 22px; border-radius: 50%; background: var(--focus); color: #fff;
-  font-size: 12px; font-weight: 700; display: grid; place-items: center; }
-.cand.k-axis .n { background: var(--hypothesis); }
+.cand .n { grid-row: span 2; align-self: start; line-height: 24px; text-align: center; border-radius: 50%; background: var(--focus); color: var(--on-accent);
+  font-size: 12px; font-weight: 700; }
+.cand.k-axis .n { background: var(--hypothesis-ink); }
 .cand .t { font-weight: 600; font-size: 13.5px; }
-.cand .meta { font-size: 12px; color: var(--sub); }
-.mode { font-size: 11px; padding: 1px 7px; border-radius: 4px; background: var(--line); color: var(--ink); margin-right: 6px; }
+.cand .meta { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 6px; align-items: center; font-size: 12px; color: var(--sub); }
+.mode { font-size: 12px; padding: 1px 7px; border-radius: 4px; background: var(--line); color: var(--ink); text-align: center; }
 
-.detail { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 13.5px; }
+.detail { margin-top: 16px; border-top-width: 1px; border-top-style: solid; border-top-color: var(--line); padding-top: 14px; font-size: 13.5px; }
 .detail h3 { font-size: 15px; margin: 0 0 6px; }
-.detail .why { background: var(--focus-bg); border-left: 3px solid var(--focus); padding: 8px 10px; border-radius: 4px; margin: 8px 0; }
+.detail .why { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px; align-items: start; background: var(--focus-bg); border-left-width: 3px; border-left-style: solid; border-left-color: var(--focus); padding: 8px 10px; border-radius: 4px; margin: 8px 0; }
 .detail .claim { margin: 8px 0; }
 .detail ul { padding-left: 18px; margin: 6px 0; }
-.cmd { display: flex; gap: 6px; margin-top: 10px; }
-.cmd code { flex: 1; font: 12px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; overflow-x: auto; white-space: nowrap; }
-.cmd button { font: inherit; font-size: 12px; border: 1px solid var(--focus); background: var(--focus); color: #fff; border-radius: 6px; padding: 0 12px; cursor: pointer; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) 88px; gap: 6px; margin-top: 10px; }
+.cmd code { font: 12px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
+.cmd button { font-family: inherit; line-height: inherit; font-size: 12px; border: 1px solid var(--focus); background: var(--focus); color: var(--on-accent); border-radius: 6px; padding: 0 8px; cursor: pointer; }
 .hint { font-size: 12px; color: var(--sub); margin-top: 10px; }
 .muted { color: var(--sub); }
 </style>
@@ -400,7 +403,7 @@ __DATA__
 <header>
   <div class="eyebrow">思考実験の地図 · <span id="map-dir"></span></div>
   <h1 id="title"></h1>
-  <p class="question" id="question"></p>
+  <p class="question"><span class="label">問い</span> <span id="question"></span></p>
   <div class="progress">
     <div class="bar" id="bar"></div>
     <div class="count" id="count"></div>
@@ -411,11 +414,11 @@ __DATA__
   <section class="panel">
     <h2>どこまで分かっているか</h2>
     <div id="axes"></div>
-    <div class="grid" id="grid"></div>
+    <section class="grid" id="grid" tabindex="0" aria-label="地図"></section>
   </section>
   <section class="panel">
     <h2>次に考える候補 — 選ぶと、推論の前提になるセルが光る</h2>
-    <ol class="cands" id="cands"></ol>
+    <ol class="cands" id="cands" role="list"></ol>
     <div class="detail" id="detail"></div>
   </section>
 </main>
@@ -426,6 +429,8 @@ const el = (tag, cls, text) => { const node = document.createElement(tag); if (c
 const labelByMode = { constructive: "組み立てる", destructive: "崩す（反例探し）", exploratory: "広げる" };
 const SETTLED = new Set(D.settled);
 const cellOf = (r, c) => D.cells.find((cell) => cell.row === r && cell.col === c) || { row: r, col: c, status: "unexplored" };
+const pressable = (node, action) => { node.tabIndex = 0; node.setAttribute("role", "button"); node.onclick = action;
+  node.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); action(); } }; };
 const nameOf = (ax, id) => D[ax].values.find((v) => v.id === id).name;
 const link = (p) => { const anchor = el("a", null, p); anchor.href = p.includes("://") ? p : D.up + p; return anchor; };
 
@@ -437,29 +442,30 @@ $("question").textContent = D.question;
 const gridCells = D.rows.values.flatMap((r) => D.cols.values.map((c) => cellOf(r.id, c.id)));
 const countByStatus = {};
 gridCells.forEach((cell) => countByStatus[cell.status] = (countByStatus[cell.status] || 0) + 1);
-["supported", "refuted", "contested", "hypothesis", "open", "out_of_scope", "unexplored"].forEach((s) => {
-  if (!countByStatus[s]) return;
-  const seg = el("span"); seg.style.width = (100 * countByStatus[s] / gridCells.length) + "%";
-  seg.style.background = `var(--${s})`; seg.title = `${D.legend_by_status[s][1]}: ${countByStatus[s]}`; $("bar").append(seg);
+const barStatuses = ["supported", "refuted", "contested", "hypothesis", "open", "out_of_scope", "unexplored"].filter((s) => countByStatus[s]);
+$("bar").style.gridTemplateColumns = barStatuses.map((s) => `${countByStatus[s]}fr`).join(" ");
+barStatuses.forEach((s) => {
+  const seg = el("i");
+  seg.style.borderTopColor = `var(--${s})`; seg.title = `${D.legend_by_status[s][1]}: ${countByStatus[s]}`; $("bar").append(seg);
 });
 const settledCount = gridCells.filter((cell) => SETTLED.has(cell.status)).length;
 $("count").append(el("b", null, `${settledCount}`), ` / ${gridCells.length} セルに結論 · 未探索 ${countByStatus.unexplored || 0}`);
 Object.entries(D.legend_by_status).forEach(([s, [glyph, meaning]]) => {
   const item = el("span"); const sw = el("i"); sw.style.background = `var(--${s})`;
-  if (s === "unexplored" || s === "open") { sw.style.background = "transparent"; sw.style.border = `1.5px dashed var(--${s})`; }
-  item.append(sw, `${glyph} ${meaning.split("（")[0]}`); $("legend").append(item);
+  if (s === "unexplored" || s === "open") { sw.style.background = "transparent"; sw.style.outline = `1.5px dashed var(--${s})`; sw.style.outlineOffset = "-1.5px"; }
+  item.append(sw, el("span", null, `${glyph} ${meaning.split("（")[0]}`)); $("legend").append(item);
 });
 
 // 軸
 const cardByAxis = {};
 [["rows", "行"], ["cols", "列"]].forEach(([ax, label]) => {
   const a = D[ax];
-  const card = el("div", "axis-card");
-  card.append(el("span", "side", label), el("span", "name", a.name));
-  card.append(el("span", "chip " + a.basis, { standard: "標準", paper: "論文", own: "自作の分類" }[a.basis]));
-  if (!a.ref_read) card.append(el("span", "chip unread", "出典は未確認"));
-  const cite = el("span", "muted"); cite.append("出典: ", link(a.ref)); if (a.ref_title) cite.lastChild.textContent = a.ref_title;
-  card.append(cite);
+  const card = el("div", "axis-card"); const body = el("div", "body"); const chips = el("div", "chips");
+  chips.append(el("span", "chip " + a.basis, { standard: "標準", paper: "論文", own: "自作の分類" }[a.basis]));
+  if (!a.ref_read) chips.append(el("span", "chip unread", "出典は未確認"));
+  const cite = el("div", "muted"); cite.append("出典: ", link(a.ref)); if (a.ref_title) cite.lastChild.textContent = a.ref_title;
+  body.append(el("div", "name", a.name), chips, cite);
+  card.append(el("div", "side", label), body);
   $("axes").append(card); cardByAxis[ax] = card;
 });
 
@@ -468,7 +474,7 @@ const grid = $("grid");
 grid.style.gridTemplateColumns = `minmax(110px, 160px) repeat(${D.cols.values.length}, minmax(120px, 1fr))`;
 grid.append(el("div", "corner", `${D.rows.name} ＼ ${D.cols.name}`));
 D.cols.values.forEach((c) => {
-  const h = el("div", "colhead" + (D.cols.basis === "own" ? " head-own" : ""), c.name);
+  const h = el("div", "colhead" + (D.cols.basis === "own" ? " head-own" : "")); h.append(el("span", null, c.name));
   const n = D.rows.values.filter((r) => SETTLED.has(cellOf(r.id, c.id).status)).length;
   h.append(el("span", "tally", `${n}/${D.rows.values.length}`)); if (c.note) h.title = c.note;
   grid.append(h);
@@ -477,27 +483,27 @@ const rankByTarget = {};
 D.candidates.forEach((cand, i) => { if (cand.kind === "cell" && rankByTarget[cand.target] == null && i < D.top) rankByTarget[cand.target] = i + 1; });
 const nodeByTarget = {};
 D.rows.values.forEach((r) => {
-  const h = el("div", "rowhead" + (D.rows.basis === "own" ? " head-own" : ""), r.name);
+  const h = el("div", "rowhead" + (D.rows.basis === "own" ? " head-own" : "")); h.append(el("span", null, r.name));
   const n = D.cols.values.filter((c) => SETTLED.has(cellOf(r.id, c.id).status)).length;
   h.append(el("span", "tally", `${n}/${D.cols.values.length}`)); if (r.note) h.title = r.note;
   grid.append(h);
   D.cols.values.forEach((c) => {
     const cell = cellOf(r.id, c.id); const target = `${r.id}/${c.id}`;
     const node = el("div", "cell " + cell.status);
-    node.append(el("div", "glyph", D.legend_by_status[cell.status][0]));
-    node.append(el("div", "text", cell.claim || cell.next_question || (cell.status === "unexplored" ? "まだ誰も考えていない" : "")));
-    if (rankByTarget[target]) node.append(el("div", "rank", rankByTarget[target]));
-    node.onclick = () => select(D.candidates.findIndex((cand) => cand.target === target), target);
+    const head = el("div", "head");
+    head.append(el("div", "glyph", D.legend_by_status[cell.status][0]), el("div", "slot"), rankByTarget[target] ? el("div", "rank", rankByTarget[target]) : el("div"));
+    node.append(head, el("div", "text", cell.claim || cell.next_question || (cell.status === "unexplored" ? "まだ誰も考えていない" : "")));
+    pressable(node, () => select(D.candidates.findIndex((cand) => cand.target === target), target));
     grid.append(node); nodeByTarget[target] = node;
   });
 });
 
 // 次に考える候補
 D.candidates.slice(0, D.top).forEach((cand, i) => {
-  const li = el("li", "cand k-" + cand.kind);
-  li.append(el("span", "n", i + 1), el("span", "t", cand.name));
-  const meta = el("span", "meta"); meta.append(el("span", "mode", labelByMode[cand.mode]), cand.kind === "axis" ? "軸を見直す" : cand.target);
-  li.append(meta); li.onclick = () => select(i); $("cands").append(li);
+  const li = el("li"); const card = el("div", "cand k-" + cand.kind);
+  card.append(el("span", "n", i + 1), el("span", "t", cand.name));
+  const meta = el("span", "meta"); meta.append(el("span", "mode", labelByMode[cand.mode]), el("span", null, cand.kind === "axis" ? "軸を見直す" : cand.target));
+  card.append(meta); pressable(card, () => select(i)); li.append(card); $("cands").append(li);
 });
 
 function select(i, target) {
@@ -505,12 +511,12 @@ function select(i, target) {
   target = target || (cand && cand.target);
   document.querySelectorAll(".cand").forEach((node, j) => node.classList.toggle("selected", j === i));
   Object.values(nodeByTarget).forEach((node) => node.classList.remove("chosen", "premise"));
+  document.querySelectorAll(".badge-premise").forEach((badge) => badge.remove());
   Object.values(cardByAxis).forEach((node) => node.classList.remove("selected"));
-  grid.classList.remove("focusing");
   if (cand && cand.kind === "axis") cardByAxis[target.split(":")[1]].classList.add("selected");
   else if (target) {
-    grid.classList.add("focusing"); nodeByTarget[target].classList.add("chosen");
-    (cand ? cand.premises : []).forEach((premise) => nodeByTarget[premise] && nodeByTarget[premise].classList.add("premise"));
+    nodeByTarget[target].classList.add("chosen");
+    (cand ? cand.premises : []).forEach((premise) => { const node = nodeByTarget[premise]; if (node) { node.classList.add("premise"); node.querySelector(".slot").append(el("span", "badge-premise", "前提")); } });
   }
   const d = $("detail"); d.replaceChildren();
   if (target && !target.startsWith("axis:")) {
@@ -524,7 +530,7 @@ function select(i, target) {
     }
   } else if (cand) d.append(el("h3", null, cand.name));
   if (cand) {
-    const box = el("div", "why"); box.append(el("span", "mode", labelByMode[cand.mode]), cand.why); d.append(box);
+    const box = el("div", "why"); box.append(el("span", "mode", labelByMode[cand.mode]), el("span", null, cand.why)); d.append(box);
     const cmd = el("div", "cmd"); const code = el("code", null, `${D.skill_command} ${D.map_dir} ${cand.target}`);
     const btn = el("button", null, "コピー");
     btn.onclick = () => navigator.clipboard.writeText(code.textContent).then(() => { btn.textContent = "コピーした"; setTimeout(() => btn.textContent = "コピー", 1200); });
