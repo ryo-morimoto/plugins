@@ -18,12 +18,12 @@ description: 複数の思考実験をまたいで、問いの空間を2軸の地
 
 ## 1. 候補を出して選んでもらう
 
-引数に `maps/<name> <row>/<col>`（または `axis:rows` / `axis:cols`）があれば、map.html からコピーされた指定なので、選択を飛ばして 2 に進む。理由とモードは `frontier --json` の該当項目を使う。
+引数に `maps/<name> <row>/<col>`（または `axis:rows` / `axis:cols`）があれば、map.html からコピーされた指定なので、選択を飛ばして 2 に進む。理由とモードは `candidates --json` の該当項目を使う。
 
 引数がなければ:
 
 ```sh
-python3 <skill>/scripts/thought_map.py frontier maps/<name> --top 6
+python3 <skill>/scripts/thought_map.py candidates maps/<name>
 ```
 
 上位3つを選択肢にして聞く（4つ目は「地図全体を見る」）。各選択肢には、セル名・状態・モードと、**なぜそこか**（どの隣のセルの結論から推論するか）を1〜2文で書く。`maps/<name>/map.html` をブラウザで開けば、全体と前提のセルが見えることも伝える。利用者が別のセルや新しい軸を言ったら、それに従う。

@@ -24,8 +24,7 @@
 | --- | --- | --- |
 | `running-thought-experiments` | skill | 1 回の思考実験の手順。問いと用語の定義 → モードの選択 → 対立する案 → 条件を変える操作 → 結果への攻撃（英語で書かれ、利用者の言語で応答する） |
 | `mapping-thought-experiments` | skill | 複数の実験をまたぐ地図を作り、次の候補を出して選んでもらい、結論を書き戻す |
-| `thought_map.py` | script | 地図の検査、候補（frontier）の算出、`map.html` の生成 |
-| `map_page.py` | script | `map.html` の見た目。外部の読み込みはしない |
+| `thought_map.py` | script | 地図の検査、候補の算出、`map.html` の生成（外部を読み込まない 1 枚の HTML） |
 | `assets/map.toml`、`assets/experiment.md` | 雛形 | 地図と、実験の記録 |
 
 `mapping-thought-experiments` は、実験の手順を `running-thought-experiments` に任せます。無くても動きますが、手順は簡略になります。
@@ -39,7 +38,7 @@
 - 候補を Claude Code に渡すコマンド（`/thought-experiments:mapping-thought-experiments maps/<name> <row>/<col>`）をコピーする
 
 ```sh
-python3 <skill>/scripts/thought_map.py frontier maps/<name>   # 次の候補
+python3 <skill>/scripts/thought_map.py candidates maps/<name> # 次に考える候補
 python3 <skill>/scripts/thought_map.py render                 # map.html を生成
 python3 <skill>/scripts/thought_map.py check                  # 形式と map.html の鮮度（CI 向け）
 ```

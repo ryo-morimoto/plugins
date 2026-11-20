@@ -97,13 +97,13 @@ class ThoughtMapTest(unittest.TestCase):
         errs = thought_map.validate(thought_map.load(self.dir))
         self.assertTrue(any("根拠 notes.md" in e for e in errs))
 
-    def test_frontier_uses_both_neighbours(self):
-        opts = {o.target: o for o in thought_map.frontier(thought_map.load(self.dir))}
+    def test_candidates_use_both_neighbours(self):
+        by_target = {cand.target: cand for cand in thought_map.candidates(thought_map.load(self.dir))}
         # a/y は、同じ行の a/x と同じ列の b/y の両方を前提にする
-        self.assertEqual(opts["a/y"].mode, "constructive")
-        self.assertEqual(sorted(opts["a/y"].premises), ["a/x", "b/y"])
+        self.assertEqual(by_target["a/y"].mode, "constructive")
+        self.assertEqual(sorted(by_target["a/y"].premises), ["a/x", "b/y"])
         # 自作の行の軸は「根拠を探す」候補になり、空のセルより上に来る
-        order = [o.target for o in thought_map.frontier(thought_map.load(self.dir))]
+        order = [cand.target for cand in thought_map.candidates(thought_map.load(self.dir))]
         self.assertLess(order.index("axis:rows"), order.index("b/x"))
         self.assertNotIn("axis:cols", order)
 
