@@ -121,7 +121,7 @@ class ThoughtMapTest(unittest.TestCase):
         data = re.search(r'<script type="application/json" id="data">(.*?)</script>', page, re.S).group(1)
         self.assertNotIn("</script", data)
         self.assertIn('"up": "../../"', data)
-        self.assertIn('"dir": "maps/demo"', data)
+        self.assertIn('"map_dir": "maps/demo"', data)
 
 
 if __name__ == "__main__":
