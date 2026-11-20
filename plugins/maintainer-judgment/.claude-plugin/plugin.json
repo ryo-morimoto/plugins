@@ -1,6 +1,6 @@
 {
   "name": "maintainer-judgment",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Product and interface judgment patterns seen across several open source projects, sorted by situation type (breaking changes, triaging contributions, defaults, native vs custom UI).",
   "author": {
     "name": "Ryo Morimoto"
