@@ -45,7 +45,7 @@ running-thought-experiments の状態（State）を、セルにこう移す。
 | 結論が Unverified の前提に依存 | `status = "hypothesis"` |
 | 対立する案が両方残った | `status = "contested"` |
 | 読んだ出典と実験の記録 | `evidence` |
-| Mode / Next moves | `mode` / `next` |
+| Mode / Next moves | `mode` / `next_question` |
 
 ほかのセルに効く結論が出たら、そのセルに `open` を置く。軸に足りない値が見つかったら、利用者に確認してから足す。
 

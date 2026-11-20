@@ -23,7 +23,7 @@ question = "問い"
 name = "行"
 basis = "own"
 ref = "notes.md"
-checked = true
+ref_read = true
 
 [[rows.values]]
 id = "a"
@@ -37,7 +37,7 @@ name = "B"
 name = "列"
 basis = "standard"
 ref = "https://example.org/std"
-checked = true
+ref_read = true
 
 [[cols.values]]
 id = "x"
@@ -101,7 +101,7 @@ class ThoughtMapTest(unittest.TestCase):
         opts = {o.target: o for o in thought_map.frontier(thought_map.load(self.dir))}
         # a/y は、同じ行の a/x と同じ列の b/y の両方を前提にする
         self.assertEqual(opts["a/y"].mode, "constructive")
-        self.assertEqual(sorted(opts["a/y"].sources), ["a/x", "b/y"])
+        self.assertEqual(sorted(opts["a/y"].premises), ["a/x", "b/y"])
         # 自作の行の軸は「根拠を探す」候補になり、空のセルより上に来る
         order = [o.target for o in thought_map.frontier(thought_map.load(self.dir))]
         self.assertLess(order.index("axis:rows"), order.index("b/x"))

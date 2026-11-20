@@ -202,7 +202,7 @@ const axisCards = {};
   const card = el("div", "axis-card");
   card.append(el("span", "dir", dir), el("span", "name", a.name));
   card.append(el("span", "chip " + a.basis, { standard: "標準", paper: "論文", own: "自作の分類" }[a.basis]));
-  if (!a.checked) card.append(el("span", "chip unchecked", "出典は未確認"));
+  if (!a.ref_read) card.append(el("span", "chip unchecked", "出典は未確認"));
   const ref = el("span", "muted"); ref.append("出典: ", link(a.ref)); if (a.ref_title) ref.lastChild.textContent = a.ref_title;
   card.append(ref);
   $("axes").append(card); axisCards[ax] = card;
@@ -231,7 +231,7 @@ D.rows.values.forEach((r) => {
     const x = cellOf(r.id, c.id); const key = `${r.id}/${c.id}`;
     const e = el("div", "cell " + x.status);
     e.append(el("div", "glyph", D.status[x.status][0]));
-    e.append(el("div", "text", x.claim || x.next || (x.status === "unexplored" ? "まだ誰も考えていない" : "")));
+    e.append(el("div", "text", x.claim || x.next_question || (x.status === "unexplored" ? "まだ誰も考えていない" : "")));
     if (rankOf[key]) e.append(el("div", "rank", rankOf[key]));
     e.onclick = () => select(D.frontier.findIndex((o) => o.target === key), key);
     grid.append(e); cellEls[key] = e;
@@ -256,7 +256,7 @@ function select(i, key) {
   if (o && o.kind === "axis") axisCards[o.target.split(":")[1]].classList.add("selected");
   else if (key) {
     grid.classList.add("focusing"); cellEls[key].classList.add("target");
-    (o ? o.sources : []).forEach((s) => cellEls[s] && cellEls[s].classList.add("premise"));
+    (o ? o.premises : []).forEach((s) => cellEls[s] && cellEls[s].classList.add("premise"));
   }
   const d = $("detail"); d.replaceChildren();
   if (key && !key.startsWith("axis:")) {
@@ -264,19 +264,19 @@ function select(i, key) {
     d.append(el("h3", null, `${D.status[x.status][0]} ${nameOf("rows", r)} × ${nameOf("cols", c)}`));
     d.append(el("div", "muted", D.status[x.status][1]));
     if (x.claim) d.append(el("p", "claim", x.claim));
-    if (x.next) d.append(el("p", null, "次の問い: " + x.next));
+    if (x.next_question) d.append(el("p", null, "次の問い: " + x.next_question));
     if (x.evidence && x.evidence.length) {
       const ul = el("ul"); x.evidence.forEach((p) => { const li = el("li", null, "根拠: "); li.append(link(p)); ul.append(li); }); d.append(ul);
     }
   } else if (o) d.append(el("h3", null, o.title));
   if (o) {
     const why = el("div", "why"); why.append(el("span", "mode", MODE[o.mode]), o.why); d.append(why);
-    const cmd = el("div", "cmd"); const code = el("code", null, `${D.invoke} ${D.dir} ${o.target}`);
+    const cmd = el("div", "cmd"); const code = el("code", null, `${D.skill_command} ${D.dir} ${o.target}`);
     const btn = el("button", null, "コピー");
     btn.onclick = () => navigator.clipboard.writeText(code.textContent).then(() => { btn.textContent = "コピーした"; setTimeout(() => btn.textContent = "コピー", 1200); });
     cmd.append(code, btn); d.append(cmd);
     d.append(el("div", "hint", "Claude Code に貼ると、この候補から思考実験を始める。"));
-  } else if (key) d.append(el("div", "hint", "このセルは今の候補に入っていない。考えたいなら Claude Code で " + D.invoke + " " + D.dir + " " + key));
+  } else if (key) d.append(el("div", "hint", "このセルは今の候補に入っていない。考えたいなら Claude Code で " + D.skill_command + " " + D.dir + " " + key));
 }
 document.addEventListener("keydown", (e) => {
   const n = parseInt(e.key, 10); if (n >= 1 && n <= Math.min(9, D.top)) select(n - 1);
