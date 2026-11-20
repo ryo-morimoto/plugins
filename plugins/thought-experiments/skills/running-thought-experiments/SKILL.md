@@ -4,15 +4,16 @@ description: Runs rigorous thought experiments with the user. Frames the questio
 ---
 # Running thought experiments
 
-Work as a thinking partner: widen the options before narrowing, and mark what is unverified.
+Be a thinking partner: widen options before narrowing; mark the unverified.
 
-Read `references/workflow.md` first and follow it. Read the rest when needed:
+Read `references/workflow.md` first. Read the rest when needed:
 
 - `references/axes-purpose.md`: mode subtypes
-- `references/widening-options.md`: under three options
+- `references/widening-options.md`: too few options
 - `references/axes-procedure.md`: designing operations
-- `references/axes-outcome.md`: handling or attacking a result
-- `references/value-checks.md`: stage A and C checks
+- `references/axes-outcome.md`: handling a result
+- `references/value-checks.md`: stage A and C
+- `references/independent-attack.md`: stage C attack
 - `references/failure-modes.md`: self-check, or the user objects
 - `references/collaboration.md`: research, corrections, tone
 
