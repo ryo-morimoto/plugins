@@ -1,0 +1,122 @@
+# Stage gates, invariants and warnings for te. Data, not code: each entry names a predicate
+# implemented in scripts/telib/rules.py and passes it arguments. Change the procedure here.
+#
+# requires: what must exist before the stage counts as done. te next shows the first unmet ones.
+# invariant: must always hold; te check fails on a violation.
+# warning: worth a look; te check reports it but does not fail.
+
+[[stage]]
+id = "A"
+name = "frame and probe"
+show = ["define-terms", "value-checks", "rivals", "probe"]
+requires = [
+  { pred = "has", kind = "frame", message = "Record the question, goal, terms, mode and setup flaw (frame)." },
+  { pred = "prior_answer_evidence", message = "Search for an existing answer before the rivals. Cite fetched sources, or record the queries and that nothing was found (prior_answer)." },
+  { pred = "count", kind = "rival", min = 3, message = "List three or more rival propositions (rival)." },
+  { pred = "any", kind = "rival", field = "is_opposite", equals = true, message = "One rival must be the opposite of the favourite (rival.is_opposite)." },
+  { pred = "has", kind = "holder", message = "Show who actually holds the proposition you will attack, or flag it as a strawman (holder)." },
+  { pred = "has", kind = "prediction", message = "Write what an informed practitioner would expect, as probabilities over the rivals, before any operation (prediction)." },
+  { pred = "has", kind = "probe", message = "Run one provisional probe: vary one condition (probe)." },
+]
+
+[[stage]]
+id = "B"
+name = "operate"
+show = ["operate", "group-differences"]
+requires = [
+  { pred = "count", kind = "operation", min = 2, message = "Run at least two operations, one variable at a time (operation)." },
+]
+
+[[stage]]
+id = "C"
+name = "attack and conclude"
+show = ["independent-attack", "conclude", "compare-prediction"]
+requires = [
+  { pred = "fresh_attack_with_artifacts", message = "Get the attack from fresh reviewers: save the brief with `te brief`, record their reply with `te brief --record-response`, then add an attack event that points to both files." },
+  { pred = "objections_answered", message = "Answer every objection with a response and a reason (attack.objections)." },
+  { pred = "has", kind = "conclusion", message = "State the conclusion as labelled premises with citations (conclusion)." },
+]
+
+[[stage]]
+id = "D"
+name = "review and close"
+show = ["review"]
+requires = [
+  { pred = "has", kind = "review", message = "Compare the result with the prediction and record novelty, importance and surprise (review)." },
+  { pred = "has", kind = "close", message = "Close the record (close)." },
+]
+
+[[invariant]]
+id = "refs-exist"
+pred = "refs_exist"
+message = "Every rival id, event id, source id and file a record points to must exist."
+
+[[invariant]]
+id = "checked-needs-primary"
+pred = "checked_needs_primary"
+message = "An empirical-checked premise must cite a primary source with a sha256, or a secondary source whose primary_of has one. Secondhand facts break conclusions; this was the most common failure."
+
+[[invariant]]
+id = "unobtainable-is-unverified"
+pred = "unobtainable_is_unverified"
+message = "A premise citing a source that could not be obtained cannot be empirical-checked."
+
+[[invariant]]
+id = "no-post-hoc-prediction"
+pred = "no_post_hoc_prediction"
+message = "Predictions must come before the first operation; a prediction written after the result cannot measure surprise."
+
+[[invariant]]
+id = "prediction-sums-to-one"
+pred = "prediction_sums_to_one"
+message = "A prediction is a probability distribution over known rivals and must sum to 1."
+
+[[invariant]]
+id = "eliminate-needs-holder"
+pred = "eliminate_needs_holder"
+message = "A rival may be weakened or eliminated only after a holder event shows who holds it, or flags it as a strawman. Refuting a view nobody holds changes no one's mind."
+
+[[invariant]]
+id = "answer-rival-survives"
+pred = "answer_rival_survives"
+message = "The rival a conclusion adopts must not be eliminated."
+
+[[invariant]]
+id = "artifacts-match"
+pred = "artifacts_match"
+message = "Brief and response files must exist and match the sha256 recorded in the attack."
+
+[[invariant]]
+id = "outputs-reproduce"
+pred = "outputs_reproduce"
+message = "Re-running scripts/ must reproduce outputs/ byte for byte, so numbers in the record cannot drift from the code."
+
+[[warning]]
+id = "one-variable"
+pred = "one_variable_per_operation"
+message = "An operation varies more than one condition; its result cannot be traced to one cause."
+
+[[warning]]
+id = "diagnostic"
+pred = "operation_is_diagnostic"
+message = "An operation changed no rival's status. A result every rival predicts teaches nothing."
+
+[[warning]]
+id = "operation-secondhand"
+pred = "operation_secondhand"
+message = "An operation uses a secondary source whose primary was not obtained. Its numbers rest on a secondhand value; obtain the primary or mark the result unverified."
+
+[[warning]]
+id = "strawman"
+pred = "strawman_flagged"
+message = "A rival is flagged as a strawman. Attack the strongest position that is actually held."
+
+[[warning]]
+id = "quotes-verified"
+pred = "quotes_verified"
+message = "A source quote was not found in the fetched text. Check the page and wording against the original."
+
+[[warning]]
+id = "self-attack"
+pred = "no_self_attack"
+message = "An attack was made by the author. Self-attacks share the author's blind spots."

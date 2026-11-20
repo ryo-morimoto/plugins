@@ -151,7 +151,7 @@ CLI:
 | --- | --- |
 | `te next <dir>` | 今の段階、足りないもの、その段階の短い指示を表示する。**エージェントが覚えるのはこれだけ** |
 | `te add <dir> <kind> --json '{…}'` | スキーマで検査してから追記する。記録を書くのはこのコマンドだけ |
-| `te source add <dir> <url> [--primary-of <id>] [--file <path>]` | 取得（または利用者が渡したファイルを読み）、sha256・取得の経路・取得日を記録する。取得できなければ `obtained = "none"` と試した経路を記録する |
+| `te source add <dir> <id> (--url <url> \| --file <path>) [--quote <text> --page <n>]…` | 取得（または利用者が渡したファイルを読み）、sha256・取得の経路・取得日を記録する。引用が取得した本文にあるかを照合し `quotes[].verified` に書く。取得できなければ `obtained = "none"` と試した経路を記録する。一次資料との対応は出典ではなく前提の引用（`citations[].primary_of`）に書く |
 | `te brief <dir> --lens <名前>` | 依頼文を `briefs/<id>.md` に保存し、sha256 を表示する。lens の既定は「実務の専門家」「方法の専門家」「専門外の読み手」（英国防省 Red Teaming Handbook の、専門家と非専門家を混ぜる勧めに沿う） |
 | `te brief <dir> --record-response <id> <file>` | reviewer の応答を保存し、sha256 を表示する |
 | `te run <dir>` | `scripts/` を実行し、`outputs/` を作る |
@@ -240,3 +240,34 @@ ryo-morimoto/thought-experiments の `experiments/2026-11-21-life-value-in-flood
 - **欄名の衝突:** 共通の `by` と攻撃の `by` がぶつかっていた。`author` と `reviewer` に分けた。
 - **規則の試し:** 5本中3本が違反を出したが、既知の失敗4つのうち確実に止まるのは2つだった。「調べた」「文脈を持たない reviewer が攻撃した」は書けば通り、藁人形は別の仮説に保持者がいれば通り、孫引きは一次資料を経由していれば通った。第2版で、生成物による証明（2.2）、`holder(attacked_rivals)`、組ごとの一次・二次と `primary_of` の追跡（2.3）に直した。
 - **一次資料で確かめ直すと:** 記録が使っていた事実のうち、人命の値（技術指針の精神的損害額だけで、総額ではなかった）、Kawabata ら（2023）の対象期間、Knutson ら（2019）が弱い基準を使った理由の3つが誤っていた。どれも孫引きが原因だった。
+
+## 13. 実装（第1版）で設計から変えたこと
+
+8章の1と4を一度に入れた。設計と違う点:
+
+- **コマンドを足した:** `te init`、`te score`、`te version [--verify]`、`te lock`、`te render --write / --reply / --lang ja`、`te next --all`（全段階の不足を一度に出す。既存の記録の監査用）。
+- **段階D（事後評価と閉じる）を足した:** `review` と `close` を `requires` にした。予想の採点は段階C の後に `te next` が表示する。
+- **藁人形の検査を不変条件に移した:** 段階A は `holder` があることだけを求め、`eliminate-needs-holder` が「弱めた・脱落させた仮説には、取得済みの出典を持つ holder か、藁人形の印が要る」を常に検査する。攻撃の対象が決まるのは段階B 以降なので、段階A の `requires` では判定できない。
+- **不変条件を足した:** `refs-exist`（仮説・出来事・出典・ファイルの参照先がある）、`prediction-sums-to-one`、`answer-rival-survives`（脱落した仮説を結論に採らない）、`artifacts-match`（依頼文と応答の sha256）。警告に `strawman`、`quotes-verified`、`self-attack`、`operation-secondhand` を足した。`operation-secondhand` は、probe と operation の `sources` に引用（`{source, level, primary_of}`）も書けるようにしたうえで、一次資料を取得していない二次資料を操作に使ったときに警告する（下の試しで見つけた穴）。
+- **自己攻撃の扱い:** subagent を使えない環境のために、利用者が `decision`（`author = "user"`、`accepts = <attack の id>`）で認めた自己攻撃だけ段階C を通す。Claude の decision では通らない。
+- **訂正:** `correction.replace` が対象の出来事に新しい値を重ねる。元の行は書き換えない。
+- **`te.lock`:** te を複数のファイル（`te.py`、`telib/`、`data/`）に分けたので、`te.py` の sha256 ではなく、それらをまとめた `bundle_sha256` を記録する。
+- **スキーマの検査:** 標準ライブラリだけで、v1 のスキーマが使うキーワードに絞った検査器を書いた。知らないキーワードがあれば例外にし、黙って通さない。
+- **`check_limits.py`:** `scripts/` と `data/` は読まれず実行されるので、ファイルの文字数の上限から外し、te が表示する文（指示 600、lens 400、規則の文 300、1段階で表示する指示の合計 1600）に上限を置いた。
+
+### 8章の2 の試し：人命の記録を v1 に移す
+
+12章の写像（ryo-morimoto/thought-experiments の `experiments/2026-11-21-life-value-in-flood-bc.md` を出来事に写したもの）を、欠けている欄を作らずに v1 へ移した（記録にない必須欄には「移行で補った印」を入れ、どこに入れたかを一覧にした）。`te next --all` と `te check --no-rerun` の結果:
+
+| 既知の失敗 | 検出 | どこで |
+| --- | --- | --- |
+| 先行する答えを探していない | した | 段階A `prior_answer_evidence` |
+| 予想を書いていない | した | 段階A（予想がないので採点もできない） |
+| 藁人形（L5 を脱落させたが、誰の立場かを示していない） | した | 不変条件 `eliminate-needs-holder`（ERROR） |
+| 自己攻撃 | した | 段階C、警告 `self-attack` |
+| 反論への応答に区分がない（自由記述だけ） | した | 段階C `objections_answered`（5件） |
+| 孫引き（取得していない技術指針 R6 の値を、砂防の資料経由で操作2と操作5に使った） | 最初はしなかった。前提の引用しか見ていなかったため。`operation-secondhand` を足して検出 | 警告 |
+| 棄却の条件を先に書いていない | スキーマが必須にしているので、移行の時点で欠落として一覧に出た | スキーマ |
+| 結論の数値の出どころ（前提が `outputs/` ではなく計算のスクリプトを指す） | 移行の時点で一覧に出た | スキーマ（`outputs/` だけを許す） |
+
+まだしていないこと: 8章の3（散文版との比較評価）。`te render` は `outputs/` の数値を本文に埋め込まず、前提の `outputs` 欄で参照する。
