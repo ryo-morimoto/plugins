@@ -1,6 +1,6 @@
 # 設計：思考実験の手順をデータとコードにする（`te`）
 
-状態: 設計（未実装）。根拠: issue #30、#28、#29。第2版で、既存の標準の調査（11章）と、既存の記録1本を移した試し（12章）の結果を反映した。
+状態: 設計（未実装、レビュー済み）。根拠: issue #30、#28、#29。第2版で、既存の標準の調査（11章）と、既存の記録1本を移した試し（12章）の結果を反映した。
 
 ## 1. 問題
 
@@ -61,7 +61,7 @@ experiments/<YYYY-MM-DD-slug>/
 | `rival` | `rid`、`text`、`is_opposite`、`would_reject_if`（何が出たら捨てるか） | A〜C |
 | `probe` / `operation` | `scenario`（固定・理想化・変化）、`varied`、`result`、`verdicts`（rid ごとの `status` と `strength`）、`sources`、`outputs` | A / B |
 | `attack` | `reviewer`（`fresh` / `self`）、`brief`（briefs/ のファイルと sha256）、`response`（同）、`objections`（`target`: premise / inference / conclusion、`ref`、`response`: surrender / bar / restrict / reinterpret / incorporate、`reason`）、`verdicts` | C |
-| `conclusion` | `answer`、`claim`（実務者向けの主張）、`premises`（`text`、`label`、`if_false`、`citations`）、`options`（`text`、`downsides`）、`accepted_downsides`、`milestones`（何が観察されたら考えを変えるか） | C |
+| `conclusion` | `answer`、`answer_rival`（最終的に採った対立仮説の rid。採点に使う。どれも採らないなら null）、`claim`（実務者向けの主張）、`premises`（`text`、`label`、`if_false`、`citations`）、`options`（`text`、`downsides`）、`accepted_downsides`、`milestones`（何が観察されたら考えを変えるか） | C |
 | `review` | `by_whom`、`value`（新しさ・重要さ・驚き）、`text`（事後評価、ユーザーによる価値の評価） | 結論の後 |
 | `correction` | `target`（出来事 id または出典 id）、`what`、`why` | いつでも |
 | `supersede` | `target`（出来事 id）、`why`（誤りの訂正ではなく、方針や範囲の変更） | いつでも |
@@ -137,6 +137,7 @@ rule = "citation.source.obtained=none -> premise.label!=empirical-checked"
 
 | 関数 | 入力 → 出力 |
 | --- | --- |
+| `score(state)` | → 予想の採点。`prediction.distribution` と `conclusion.answer_rival` から、多クラスの Brier スコア（Σ(pᵢ − oᵢ)²、0 が最良、2 が最悪）と、採った仮説に置いた確率を返す。どちらかが欠けていれば採点しない |
 | `upcast(event)` | 古い版の出来事 → 現在の版（`fold` の手前で必ず通す） |
 | `fold(events)` | 出来事の列 → 現在の状態（段階、対立仮説ごとの状態、前提、未検証の一覧） |
 | `next_step(rules, state)` | → 今の段階、足りないもの、見せる指示の id |
@@ -200,11 +201,14 @@ CLI:
 - 既存の記録は移さず、新しい実験から te を使う。評価用に1本だけ一回限りで移す（Overeem ら 2021 は copy-and-transform を性能か保守性が落ちたときに限る）。
 - 正本にしない標準: RO-Crate、CloudEvents の外枠、PROV-O、AIF。対応表か片方向の書き出しにとどめる。
 
-決めていないこと:
+レビューで決めたこと（ユーザーの判断）:
 
-- 利用者のリポジトリの CI が `te.py` をどう入手するか（プラグインの固定したコミットを取得し、使った版を記録する案）。
-- 呼ばれる割合が低いと分かったときに、MCP サーバー（Agent Plugins 1.0.0 の範囲内）に移すか。8章の評価で決める。
-- 予想の採点（Brier スコア）を `fold` で出すか。`prediction.distribution` があれば計算はできる。
+- **CI での `te.py` の入手:** プラグインの固定したコミットを取得し、使った版を記録する。利用者のリポジトリの根に `te.lock`（プラグインのリポジトリの URL、コミット、`te.py` の sha256）を置く。CI はそのコミットを取得して sha256 を照合してから実行し、`te check` は使った版（コミットと sha256）を出力の先頭に書く。版を上げるときは `te.lock` を書き換えるコミットにする。
+- **予想の採点:** 出す。`score`（4章）が Brier スコアを計算し、`te render` が README に載せ、`te next` は結論の後に表示する。採点は事後評価（`review`）の「驚き」の材料にする。採った仮説に置いた確率が低いほど、結果は事前の予想から離れていた。
+
+決めないこと:
+
+- **MCP サーバーへの移行:** 起きてから考えれば間に合う（ユーザーの判断）。`te next` が呼ばれないことが評価で分かったときに検討する。いまは設計に含めない。
 
 ## 10. 外部の標準との対応（要約）
 
