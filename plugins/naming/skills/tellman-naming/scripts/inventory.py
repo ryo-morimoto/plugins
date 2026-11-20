@@ -178,7 +178,17 @@ def main(argv: list[str]) -> int:
                         pass
         return 0
     rows = collect(paths)
+    # --collisions and --unused can be combined; each prints its own section.
+    if "--collisions" in argv:
+        print("# collisions: one word, two or more kinds")
+        kinds = defaultdict(set)
+        for kind, name in rows:
+            kinds[name.lstrip(".-#")].add(kind)
+        for name in sorted(kinds):
+            if len(kinds[name]) > 1:
+                print(f"{name}\t{', '.join(sorted(kinds[name]))}")
     if "--unused" in argv:
+        print("# unused: the word appears only once")
         text = "\n".join(f.read_text(encoding="utf-8", errors="replace") for p in paths
                          for f in ([p] if p.is_file() else sorted(p.rglob("*")))
                          if f.is_file() and not SKIP & set(f.parts))
@@ -189,14 +199,7 @@ def main(argv: list[str]) -> int:
                 continue
             if len(re.findall(r"(?<![\w$-])" + re.escape(word) + r"(?![\w$-])", text)) <= 1:
                 print(f"{kind}\t{name}\t{', '.join(rows[(kind, name)])}")
-        return 0
-    if "--collisions" in argv:
-        kinds = defaultdict(set)
-        for kind, name in rows:
-            kinds[name.lstrip(".-#")].add(kind)
-        for name in sorted(kinds):
-            if len(kinds[name]) > 1:
-                print(f"{name}\t{', '.join(sorted(kinds[name]))}")
+    if "--collisions" in argv or "--unused" in argv:
         return 0
     for (kind, name), where in sorted(rows.items()):
         print(f"{kind}\t{name}\t{', '.join(sorted(set(where)))}")

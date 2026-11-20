@@ -64,6 +64,12 @@ class InventoryTest(unittest.TestCase):
         self.assertIn("css-class\tflag", out)
         self.assertNotIn("css-class\tused", out)
 
+    def test_collisions_and_unused_together(self):
+        out = self.run_script("--collisions", "--unused")
+        self.assertIn("# collisions", out)
+        self.assertIn("# unused", out)
+        self.assertIn("css-class\tflag", out)
+
     def test_words_finds_leftovers(self):
         out = self.run_script("--words", "checked")
         self.assertIn("conf.toml:2:", out)
