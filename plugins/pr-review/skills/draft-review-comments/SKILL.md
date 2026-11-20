@@ -42,6 +42,8 @@ python3 <skill>/scripts/resolve-permalinks.py --repo <リポジトリのパス> 
 - `blocking`: マージを止めるか
 - `importance`: `high`、`mid`、`low`
 
+気づきごとに、「読む人に決めてほしいこと」と「扱う場所（この PR か、別の issue か）」が書けるかを確かめます。書けなければ、コメントにしない案を、人に示します（`references/rules.md` の「コメントにする条件」）。
+
 人が決めたら、assessment を記録します。
 
 - `intent_quote`（何を実現したいか）と `premise_quote`（そう考える前提）は、**人の言葉の原文**を、言い換えずに書きます。

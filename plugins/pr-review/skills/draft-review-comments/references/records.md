@@ -241,7 +241,7 @@ reason_quote: "該当の行番号も書き添えてほしい"
 approved_by: "example-reviewer"
 approved_at: "2026-11-20T07:44:12Z"
 ---
-【相談】税額を含めた合計の端数処理について
+question (non-blocking): 税額を含めた合計の端数処理について
 （以下、下書きの本文。`rules.md` の 3 部形式）
 ```
 
