@@ -25,7 +25,7 @@
     },
     {
       "name": "maintainer-judgment",
-      "description": "削除・名前変更、機能の要望への返答、既定値、標準の UI 部品か自作か、を判断するときの、複数の OSS で見られたパターン",
+      "description": "破壊的な変更（削除・名前の変更・非推奨）、外からの要望や PR への返答、既定値、標準の UI 部品か自作か、を判断するときの、複数の OSS で見られたパターン",
       "source": "./plugins/maintainer-judgment",
       "category": "development"
     },
