@@ -297,13 +297,14 @@ TEMPLATE = r"""<!doctype html>
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
-  font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  overflow-wrap: anywhere; }
 a { color: var(--focus); }
 header { padding: 28px 32px 8px; max-width: 1400px; margin: 0 auto; }
 .eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--sub); }
 h1 { font-size: 24px; margin: 4px 0 6px; }
 .question { font-size: 17px; margin: 0 0 16px; }
-.question::before { content: "問い "; color: var(--sub); font-size: 13px; }
+.question .label { color: var(--sub); font-size: 13px; }
 .progress { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .bar { display: flex; height: 10px; width: min(420px, 100%); border-radius: 5px; overflow: hidden; background: var(--line); }
 .bar span { display: block; height: 100%; }
@@ -313,7 +314,8 @@ h1 { font-size: 24px; margin: 4px 0 6px; }
 .legend i { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; border-radius: 3px; }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; padding: 16px 32px 40px; max-width: 1400px; margin: 0 auto; }
-@media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { header { padding: 20px 16px 8px; } main { padding: 12px 16px 32px; gap: 16px; } section.panel { padding: 14px; } }
 section.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
 h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; letter-spacing: .04em; }
 
@@ -329,7 +331,7 @@ h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; let
 .axis-card.selected { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
 
 /* 地図 */
-.grid { display: grid; gap: 6px; margin-top: 14px; }
+.grid { display: grid; gap: 6px; margin-top: 14px; overflow-x: auto; padding-bottom: 4px; }
 .colhead, .rowhead { font-size: 13px; font-weight: 600; padding: 6px 8px; display: flex; flex-direction: column; justify-content: center; }
 .colhead { text-align: center; align-items: center; border-bottom: 2px solid var(--line); }
 .rowhead { border-right: 2px solid var(--line); }
@@ -365,7 +367,7 @@ h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; let
 .grid.focusing .cell.chosen, .grid.focusing .cell.premise { opacity: 1; }
 .cell.chosen { box-shadow: 0 0 0 3px var(--focus); }
 .cell.premise { box-shadow: 0 0 0 3px var(--premise); }
-.cell.premise::after { content: "前提"; position: absolute; top: 8px; left: 32px; font-size: 10px;
+.badge-premise { position: absolute; top: 8px; left: 32px; font-size: 10px;
   color: #fff; background: var(--premise); padding: 0 6px; border-radius: 4px; }
 
 /* 次に考える候補 */
@@ -387,8 +389,8 @@ h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; let
 .detail .claim { margin: 8px 0; }
 .detail ul { padding-left: 18px; margin: 6px 0; }
 .cmd { display: flex; gap: 6px; margin-top: 10px; }
-.cmd code { flex: 1; font: 12px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; overflow-x: auto; white-space: nowrap; }
-.cmd button { font: inherit; font-size: 12px; border: 1px solid var(--focus); background: var(--focus); color: #fff; border-radius: 6px; padding: 0 12px; cursor: pointer; }
+.cmd code { flex: 1; font: 12px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
+.cmd button { font-family: inherit; line-height: inherit; font-size: 12px; border: 1px solid var(--focus); background: var(--focus); color: #fff; border-radius: 6px; padding: 0 12px; cursor: pointer; }
 .hint { font-size: 12px; color: var(--sub); margin-top: 10px; }
 .muted { color: var(--sub); }
 </style>
@@ -400,7 +402,7 @@ __DATA__
 <header>
   <div class="eyebrow">思考実験の地図 · <span id="map-dir"></span></div>
   <h1 id="title"></h1>
-  <p class="question" id="question"></p>
+  <p class="question"><span class="label">問い</span> <span id="question"></span></p>
   <div class="progress">
     <div class="bar" id="bar"></div>
     <div class="count" id="count"></div>
@@ -505,12 +507,13 @@ function select(i, target) {
   target = target || (cand && cand.target);
   document.querySelectorAll(".cand").forEach((node, j) => node.classList.toggle("selected", j === i));
   Object.values(nodeByTarget).forEach((node) => node.classList.remove("chosen", "premise"));
+  document.querySelectorAll(".badge-premise").forEach((badge) => badge.remove());
   Object.values(cardByAxis).forEach((node) => node.classList.remove("selected"));
   grid.classList.remove("focusing");
   if (cand && cand.kind === "axis") cardByAxis[target.split(":")[1]].classList.add("selected");
   else if (target) {
     grid.classList.add("focusing"); nodeByTarget[target].classList.add("chosen");
-    (cand ? cand.premises : []).forEach((premise) => nodeByTarget[premise] && nodeByTarget[premise].classList.add("premise"));
+    (cand ? cand.premises : []).forEach((premise) => { const node = nodeByTarget[premise]; if (node) { node.classList.add("premise"); node.append(el("span", "badge-premise", "前提")); } });
   }
   const d = $("detail"); d.replaceChildren();
   if (target && !target.startsWith("axis:")) {
