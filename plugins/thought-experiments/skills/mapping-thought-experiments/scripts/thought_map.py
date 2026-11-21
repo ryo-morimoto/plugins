@@ -32,15 +32,15 @@ TOP = 6  # 順位を出す候補の数（map.html と candidates の既定）
 # map.html の「コピー」で渡すコマンド。plugin の skill は <plugin>:<skill> で呼ぶ。
 SKILL_COMMAND = "/thought-experiments:mapping-thought-experiments"
 
-# 状態 → (記号, 意味)。「埋まった」とみなすのは SETTLED だけ。
+# 状態 → (記号, 意味, 凡例の短い名前)。「埋まった」とみなすのは SETTLED だけ。
 LEGEND_BY_STATUS = {
-    "unexplored": ("·", "未探索（セルの記述がない）"),
-    "open": ("?", "問いだけがある"),
-    "hypothesis": ("△", "仮説はあるが裏付けがない"),
-    "supported": ("◎", "根拠のある結論"),
-    "refuted": ("✕", "仮説が否定された（否定されたこと自体が結論）"),
-    "contested": ("!", "根拠が衝突している"),
-    "out_of_scope": ("—", "この地図では扱わない（理由を claim に書く）"),
+    "unexplored": ("·", "未探索（セルの記述がない）", "未探索"),
+    "open": ("?", "問いだけがある", "問いだけ"),
+    "hypothesis": ("△", "仮説はあるが裏付けがない", "仮説"),
+    "supported": ("◎", "根拠のある結論", "結論"),
+    "refuted": ("×", "仮説が否定された（否定されたこと自体が結論）", "否定"),
+    "contested": ("!", "根拠が衝突している", "衝突"),
+    "out_of_scope": ("—", "この地図では扱わない（理由を claim に書く）", "扱わない"),
 }
 SETTLED = {"supported", "refuted"}
 MODES = {"constructive", "destructive", "exploratory"}
@@ -137,29 +137,28 @@ def candidates(m: dict) -> list[Candidate]:
     for ax in ("rows", "cols"):
         a = m[ax]
         if a["basis"] == "own":
-            cands.append(Candidate(75, "axis", f"axis:{ax}", f"軸「{a['name']}」の根拠を探す",
+            cands.append(Candidate(75, "axis", f"axis:{ax}", f"軸 {a['name']} の根拠を探す",
                                    "自作の分類なので、既存の標準・論文の分類と突き合わせると欠けている値が見つかる可能性がある",
                                    "exploratory"))
         elif not a.get("ref_read"):
-            cands.append(Candidate(50, "axis", f"axis:{ax}", f"軸「{a['name']}」の出典を確認する",
-                                   f"出典（{a['ref']}）の本文で値の定義をまだ確かめていない", "exploratory"))
+            cands.append(Candidate(50, "axis", f"axis:{ax}", f"軸 {a['name']} の出典を確認する",
+                                   f"出典 {a['ref']} の本文で、値の定義をまだ確かめていない", "exploratory"))
 
     for r in row_ids:
         for c in col_ids:
             cell = m["_cells"].get((r, c), {})
             st = status(m, r, c)
-            cell_name = f"{name(m, 'rows', r)} × {name(m, 'cols', c)}"
+            cell_name = f"{name(m, 'rows', r)} / {name(m, 'cols', c)}"
             target = f"{r}/{c}"
             if st == "contested":
                 cands.append(Candidate(100, "cell", target, cell_name,
-                                       f"根拠が衝突している（{cell['claim']}）。どの前提が違うのかを特定する", "destructive"))
+                                       "根拠が衝突している。どの前提が違うのかを特定する", "destructive"))
             elif st == "hypothesis":
                 cands.append(Candidate(80, "cell", target, cell_name,
-                                       f"仮説「{cell['claim']}」に反例がないか。反例がなければ根拠を足して確定させる",
+                                       "この仮説に反例がないか。反例がなければ根拠を足して確定させる",
                                        "destructive"))
             elif st == "open":
-                q = cell.get("next_question") or cell.get("claim") or "問いが置かれている"
-                cands.append(Candidate(70, "cell", target, cell_name, f"問い「{q}」に答える", "constructive"))
+                cands.append(Candidate(70, "cell", target, cell_name, "置かれた問いに答える", "constructive"))
             elif st in SETTLED and not cell.get("evidence"):
                 cands.append(Candidate(65, "cell", target, cell_name,
                                        "結論に根拠が書かれていない。根拠を足すか、仮説に戻す", "destructive"))
@@ -169,15 +168,14 @@ def candidates(m: dict) -> list[Candidate]:
                 in_col = [(rr, m["_cells"][(rr, c)]) for rr in row_ids if status(m, rr, c) in SETTLED]
                 score = 40 + 10 * min(len(in_row), 2) + 10 * min(len(in_col), 2)
                 if in_row and in_col:
-                    (cc, row_cell), (rr, col_cell) = in_row[0], in_col[0]
-                    why = (f"同じ行の「{name(m, 'cols', cc)}」では「{row_cell['claim']}」、"
-                           f"同じ列の「{name(m, 'rows', rr)}」では「{col_cell['claim']}」。"
-                           "両方を前提にすると、このセルで何が言えるかを組み立てる")
+                    cc, rr = in_row[0][0], in_col[0][0]
+                    why = (f"同じ行の {name(m, 'cols', cc)} と、同じ列の {name(m, 'rows', rr)} の結論を前提にすると、"
+                           "このセルで何が言えるかを組み立てる")
                     cands.append(Candidate(score, "cell", target, cell_name, why, "constructive",
                                            [f"{r}/{cc}", f"{rr}/{c}"]))
                 elif in_row or in_col:
                     ax, (vid, near) = ("cols", in_row[0]) if in_row else ("rows", in_col[0])
-                    why = (f"隣の「{name(m, ax, vid)}」の結論「{near['claim']}」がここにも移るか。"
+                    why = (f"隣の {name(m, ax, vid)} の結論がここにも移るか。"
                            "移らないなら、何が違うせいかを条件を変えて探す")
                     mode = "destructive" if near["status"] == "supported" else "constructive"
                     cands.append(Candidate(score, "cell", target, cell_name, why, mode,
@@ -285,7 +283,7 @@ TEMPLATE = r"""<!doctype html>
   --supported: #2f7d6d; --supported-bg: #dcefe9; --refuted: #7a5c58; --refuted-bg: #ece3e1;
   --on-accent: #ffffff; --supported-ink: #24614f; --contested-ink: #a8301f; --hypothesis: #b07a12; --hypothesis-ink: #8a5f0e; --hypothesis-bg: #f8ecd2; --open: #b07a12; --contested: #c0392b; --contested-bg: #f7dcd8;
   --unexplored: #b9b5aa; --focus: #3b5bdb; --focus-bg: #e5eafd; --premise: #7048e8;
-  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: "Noto Sans Mono", monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -297,28 +295,30 @@ TEMPLATE = r"""<!doctype html>
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
-  font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-family: "Noto Sans JP", "Noto Sans CJK JP", sans-serif; font-size: 15px; line-height: 1.5; font-weight: 400;
   overflow-wrap: anywhere; }
 a { color: var(--focus); }
 header { padding: 28px 32px 8px; max-width: 1400px; margin: 0 auto; }
-.eyebrow { font-size: 12px; letter-spacing: 1px; color: var(--sub); }
-h1 { font-size: 24px; margin: 4px 0 6px; }
-.question { font-size: 17px; margin: 0 0 16px; }
-.question .label { color: var(--sub); font-size: 13px; }
+.eyebrow { font-size: 12px; color: var(--sub); }
+h1 { font-size: 24px; font-weight: 700; margin: 4px 0 6px; }
+.question { display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: start; font-size: 17px; margin: 0 0 16px; }
+.question .label { color: var(--sub); font-size: 13px; padding-top: 3px; }
 .progress { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .bar { display: grid; max-width: 420px; border-radius: 5px; overflow: hidden; background: var(--line); }
 .bar i { display: block; border-top-width: 10px; border-top-style: solid; }
-.progress .count { font-size: 14px; }
-.progress .count b { font-size: 20px; }
-.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 4px 12px; font-size: 12px; color: var(--sub); }
-.legend > span { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 4px; align-items: center; }
+.progress .count { font-size: 14px; font-weight: 700; }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 4px 12px; font-size: 12px; color: var(--sub); }
+.legend > span { display: grid; grid-template-columns: 14px 14px minmax(0, 1fr); gap: 4px; align-items: center; }
 .legend i { display: block; width: 14px; border-top-width: 14px; border-top-style: solid; border-top-color: transparent; border-radius: 3px; }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; padding: 16px 32px 40px; max-width: 1400px; margin: 0 auto; }
 @media (max-width: 1000px) { main { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) { header { padding: 20px 16px 8px; } main { padding: 12px 16px 32px; gap: 16px; } section.panel { padding: 14px; } }
 section.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
-h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; letter-spacing: 0.5px; }
+h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; }
+
+/* 折り返さない短いラベル（はみ出さないことは検査で確かめる） */
+.legend > span > span, .chip, .mode, .tally, .rank, .cand .n, .cell .glyph, .axis-card .side, .cmd button, .badge-premise, .question .label { white-space: nowrap; }
 
 /* 軸 */
 .axis-card { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 10px; margin-bottom: 8px; font-size: 13px; }
@@ -377,22 +377,24 @@ h2 { font-size: 14px; margin: 0 0 12px; color: var(--sub); font-weight: 600; let
   grid-template-columns: 24px minmax(0, 1fr); gap: 2px 8px; }
 .cand:hover { border-color: var(--focus); }
 .cand.selected { border-color: var(--focus); background: var(--focus-bg); }
-.cand .n { grid-row: span 2; align-self: start; line-height: 24px; text-align: center; border-radius: 50%; background: var(--focus); color: var(--on-accent);
+.cand .n { align-self: start; line-height: 24px; text-align: center; border-radius: 50%; background: var(--focus); color: var(--on-accent);
   font-size: 12px; font-weight: 700; }
 .cand.k-axis .n { background: var(--hypothesis-ink); }
+.cand .body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 .cand .t { font-weight: 600; font-size: 13.5px; }
 .cand .meta { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 6px; align-items: center; font-size: 12px; color: var(--sub); }
 .mode { font-size: 12px; padding: 1px 7px; border-radius: 4px; background: var(--line); color: var(--ink); text-align: center; }
 
 .detail { margin-top: 16px; border-top-width: 1px; border-top-style: solid; border-top-color: var(--line); padding-top: 14px; font-size: 13.5px; }
-.detail h3 { font-size: 15px; margin: 0 0 6px; }
+.detail h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+.detail h3.with-glyph { display: grid; grid-template-columns: 24px minmax(0, 1fr); }
 .detail .why { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px; align-items: start; background: var(--focus-bg); border-left-width: 3px; border-left-style: solid; border-left-color: var(--focus); padding: 8px 10px; border-radius: 4px; margin: 8px 0; }
-.detail .claim { margin: 8px 0; }
+.detail p { margin: 8px 0; }
 .detail ul { padding-left: 18px; margin: 6px 0; }
 .cmd { display: grid; grid-template-columns: minmax(0, 1fr) 88px; gap: 6px; margin-top: 10px; }
-.cmd code { font: 12px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
+.cmd .cmd-text { font-family: var(--mono); font-size: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
 .cmd button { font-family: inherit; line-height: inherit; font-size: 12px; border: 1px solid var(--focus); background: var(--focus); color: var(--on-accent); border-radius: 6px; padding: 0 8px; cursor: pointer; }
-.hint { font-size: 12px; color: var(--sub); margin-top: 10px; }
+.hint { font-size: 12px; color: var(--sub); margin: 10px 0 0; }
 .muted { color: var(--sub); }
 </style>
 </head>
@@ -417,7 +419,8 @@ __DATA__
     <section class="grid" id="grid" tabindex="0" aria-label="地図"></section>
   </section>
   <section class="panel">
-    <h2>次に考える候補 — 選ぶと、推論の前提になるセルが光る</h2>
+    <h2>次に考える候補</h2>
+    <p class="hint">選ぶと、推論の前提になるセルが光る</p>
     <ol class="cands" id="cands" role="list"></ol>
     <div class="detail" id="detail"></div>
   </section>
@@ -449,11 +452,11 @@ barStatuses.forEach((s) => {
   seg.style.borderTopColor = `var(--${s})`; seg.title = `${D.legend_by_status[s][1]}: ${countByStatus[s]}`; $("bar").append(seg);
 });
 const settledCount = gridCells.filter((cell) => SETTLED.has(cell.status)).length;
-$("count").append(el("b", null, `${settledCount}`), ` / ${gridCells.length} セルに結論 · 未探索 ${countByStatus.unexplored || 0}`);
-Object.entries(D.legend_by_status).forEach(([s, [glyph, meaning]]) => {
-  const item = el("span"); const sw = el("i"); sw.style.background = `var(--${s})`;
+$("count").textContent = `${settledCount} / ${gridCells.length} セルに結論 · 未探索 ${countByStatus.unexplored || 0}`;
+Object.entries(D.legend_by_status).forEach(([s, [glyph, meaning, short]]) => {
+  const item = el("span"); item.title = meaning; const sw = el("i"); sw.style.background = `var(--${s})`;
   if (s === "unexplored" || s === "open") { sw.style.background = "transparent"; sw.style.outline = `1.5px dashed var(--${s})`; sw.style.outlineOffset = "-1.5px"; }
-  item.append(sw, el("span", null, `${glyph} ${meaning.split("（")[0]}`)); $("legend").append(item);
+  item.append(sw, el("span", "glyph", glyph), el("span", null, short)); $("legend").append(item);
 });
 
 // 軸
@@ -472,7 +475,7 @@ const cardByAxis = {};
 // 地図
 const grid = $("grid");
 grid.style.gridTemplateColumns = `minmax(110px, 160px) repeat(${D.cols.values.length}, minmax(120px, 1fr))`;
-grid.append(el("div", "corner", `${D.rows.name} ＼ ${D.cols.name}`));
+grid.append(el("div", "corner", `${D.rows.name} / ${D.cols.name}`));
 D.cols.values.forEach((c) => {
   const h = el("div", "colhead" + (D.cols.basis === "own" ? " head-own" : "")); h.append(el("span", null, c.name));
   const n = D.rows.values.filter((r) => SETTLED.has(cellOf(r.id, c.id).status)).length;
@@ -501,9 +504,10 @@ D.rows.values.forEach((r) => {
 // 次に考える候補
 D.candidates.slice(0, D.top).forEach((cand, i) => {
   const li = el("li"); const card = el("div", "cand k-" + cand.kind);
-  card.append(el("span", "n", i + 1), el("span", "t", cand.name));
+  const body = el("span", "body"); body.append(el("span", "t", cand.name));
+  card.append(el("span", "n", i + 1), body);
   const meta = el("span", "meta"); meta.append(el("span", "mode", labelByMode[cand.mode]), el("span", null, cand.kind === "axis" ? "軸を見直す" : cand.target));
-  card.append(meta); pressable(card, () => select(i)); li.append(card); $("cands").append(li);
+  body.append(meta); pressable(card, () => select(i)); li.append(card); $("cands").append(li);
 });
 
 function select(i, target) {
@@ -521,7 +525,7 @@ function select(i, target) {
   const d = $("detail"); d.replaceChildren();
   if (target && !target.startsWith("axis:")) {
     const [r, c] = target.split("/"); const cell = cellOf(r, c);
-    d.append(el("h3", null, `${D.legend_by_status[cell.status][0]} ${nameOf("rows", r)} × ${nameOf("cols", c)}`));
+    const h3 = el("h3", "with-glyph"); h3.append(el("span", null, D.legend_by_status[cell.status][0]), el("span", null, `${nameOf("rows", r)} / ${nameOf("cols", c)}`)); d.append(h3);
     d.append(el("div", "muted", D.legend_by_status[cell.status][1]));
     if (cell.claim) d.append(el("p", "claim", cell.claim));
     if (cell.next_question) d.append(el("p", null, "次の問い: " + cell.next_question));
@@ -531,7 +535,7 @@ function select(i, target) {
   } else if (cand) d.append(el("h3", null, cand.name));
   if (cand) {
     const box = el("div", "why"); box.append(el("span", "mode", labelByMode[cand.mode]), el("span", null, cand.why)); d.append(box);
-    const cmd = el("div", "cmd"); const code = el("code", null, `${D.skill_command} ${D.map_dir} ${cand.target}`);
+    const cmd = el("div", "cmd"); const code = el("code", "cmd-text", `${D.skill_command} ${D.map_dir} ${cand.target}`);
     const btn = el("button", null, "コピー");
     btn.onclick = () => navigator.clipboard.writeText(code.textContent).then(() => { btn.textContent = "コピーした"; setTimeout(() => btn.textContent = "コピー", 1200); });
     cmd.append(code, btn); d.append(cmd);
