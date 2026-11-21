@@ -1078,6 +1078,32 @@
          "type": "string",
          "pattern": "^outputs/[^/]+$"
         }
+       },
+       "searched": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "object",
+         "required": [
+          "query",
+          "scope"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "query": {
+           "type": "string",
+           "minLength": 1
+          },
+          "scope": {
+           "type": "string",
+           "minLength": 1
+          },
+          "results": {
+           "type": "integer",
+           "minimum": 0
+          }
+         }
+        }
        }
       }
      }
@@ -1134,6 +1160,10 @@
       "type": "string",
       "minLength": 1
      }
+    },
+    "supersedes": {
+     "type": "integer",
+     "minimum": 1
     }
    },
    "additionalProperties": false

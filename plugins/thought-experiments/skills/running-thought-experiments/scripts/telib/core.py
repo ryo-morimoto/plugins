@@ -34,7 +34,7 @@ def fold(events: list[dict], experiment: dict | None = None) -> dict:
     for e in events:
         if e["kind"] == "supersede":
             superseded.add(e["target"])
-        if e["kind"] == "frame" and "supersedes" in e:
+        if e["kind"] in ("frame", "conclusion") and "supersedes" in e:
             superseded.add(e["supersedes"])
         if e["kind"] == "correction":
             t = e["target"]

@@ -33,7 +33,7 @@ def brief(state: dict, lens: dict) -> str:
         lines += [f"- **{t['term']}**: {t['reading']}" for t in f["terms"]]
         lines.append("")
     if c:
-        lines += ["## Claim", "", c.get("claim") or c["answer"], "", "## Premises", ""]
+        lines += [f"<!-- conclusion event {c['id']} -->", "", "## Claim", "", c.get("claim") or c["answer"], "", "## Premises", ""]
         for p in c["premises"]:
             lines.append(f"- {p['pid']} [{p['label']}] {p['text']}")
         lines.append("")
@@ -142,11 +142,17 @@ def argdown(state: dict) -> str:
     return "\n".join(out) + "\n"
 
 
+STAGES = ["A", "B", "C", "D", "done"]
+
+
 def reply_skeleton(state: dict, step: dict, scored: dict | None, lang: str = "en") -> str:
-    """The fixed tail of a reply: state lines and the next-move slots, so its shape never drifts."""
+    """The fixed tail of a reply: state lines and the next-move slots, so its shape never drifts.
+    A reply usually reports the stage just completed, so name both it and the next one."""
     L = LABELS[lang]
     rivals = ", ".join(f"{r['rid']}={r['status']}" for r in state["rivals"].values()) or "-"
-    lines = [f"**{L['state']}**", f"- stage: {step['stage']} ({step['name']})", f"- rivals: {rivals}"]
+    i = STAGES.index(step["stage"])
+    stage = f"{step['stage']} in progress" if i == 0 else f"{STAGES[i - 1]} done, next {step['stage']}"
+    lines = [f"**{L['state']}**", f"- stage: {stage}", f"- rivals: {rivals}"]
     if step["missing"]:
         lines.append(f"- missing: {'; '.join(m['message'] for m in step['missing'][:3])}")
     if scored:
